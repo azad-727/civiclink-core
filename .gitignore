@@ -1,0 +1,31 @@
+
+# -- Backend Spring Boot
+
+.idea/
+.vscode/
+*.iml
+target/
+*.class
+*.jar
+*.war
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# -- Frontend (React / Node)
+
+node_modules/
+buld/
+dist/
+.env
+.env.local
+
+#--- OS Generated File
+
+.DS_Store
+Thumbs.db
+
+#--- Logs
+
+*.log
+npm-debug.log*
