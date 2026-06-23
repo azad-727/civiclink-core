@@ -7,9 +7,9 @@ spring:
       name: auth-service
     data:
       mongodb:
-        uri: mongodb+srv://sazad3774_db_user:azadMongodb2026@civiclink.xkim187.mongodb.net/?retryWrites=true&w=majority
+        uri: ${MONGO_URI}
 
 
 jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    secret: ${JWT_SECRET}
     expiration: 86400000
