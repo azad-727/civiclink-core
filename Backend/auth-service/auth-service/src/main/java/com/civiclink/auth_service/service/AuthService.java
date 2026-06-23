@@ -30,12 +30,24 @@ public class AuthService {
     }
 
     public User authenticateUser(LoginRequest request){
+        System.out.println("--- LOGIN ATTEMPT ---");
+        System.out.println("1. Incoming email: [" + request.email() + "]");
+        System.out.println("2. Incoming password: [" + request.password() + "]");
+
         User user=userRepo.findByEmail(request.email())
-                .orElseThrow(()-> new IllegalArgumentException("Invalid email or password."));
+
+                .orElseThrow(()->{
+                    System.out.println("-> ERROR: Email not found in the MongoDB database.");
+                    return new IllegalArgumentException("Invalid email or password.");});
+
+        System.out.println("3. User found in DB! Assigned Role: " + user.getRole());
+        System.out.println("4. Stored DB Hash: " + user.getPasswordHash());
 
         if(!passwordEncoder.matches(request.password(),user.getPasswordHash())){
+            System.out.println("-> ERROR: BCrypt rejects the password match.");
                     throw new IllegalArgumentException("Invalid email or password.");
         }
+        System.out.println("-> SUCCESS: Password matches! Issuing token...");
         return user;
     }
 

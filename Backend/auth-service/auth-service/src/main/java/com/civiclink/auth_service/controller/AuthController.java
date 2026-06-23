@@ -3,9 +3,13 @@ package com.civiclink.auth_service.controller;
 import com.civiclink.auth_service.dto.AuthResponse;
 import com.civiclink.auth_service.dto.LoginRequest;
 import com.civiclink.auth_service.dto.RegisterRequest;
+import com.civiclink.auth_service.dto.TokenRefreshRequest;
+import com.civiclink.auth_service.model.RefreshToken;
 import com.civiclink.auth_service.model.User;
+import com.civiclink.auth_service.repository.UserRepository;
 import com.civiclink.auth_service.security.JwtUtil;
 import com.civiclink.auth_service.service.AuthService;
+import com.civiclink.auth_service.service.RefreshTokenService;
 import io.jsonwebtoken.Jwt;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -21,9 +25,14 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
-    public AuthController(AuthService authService, JwtUtil jwtUtil){
+    private final RefreshTokenService refreshTokenService;
+    private final UserRepository userRepository;
+
+    public AuthController(AuthService authService, JwtUtil jwtUtil, RefreshTokenService refreshTokenService, UserRepository userRepository){
         this.authService=authService;
         this.jwtUtil=jwtUtil;
+        this.refreshTokenService=refreshTokenService;
+        this.userRepository=userRepository;
     }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request){
@@ -44,17 +53,44 @@ public class AuthController {
             // 2. Generate the JWT
             String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
+            RefreshToken refreshToken=refreshTokenService.createRefreshToken(user.getId());
             // 3. Return the token and user data to the React frontend
             return ResponseEntity.ok(new AuthResponse(
                     token,
+                    refreshToken.getToken(),
                     user.getUsername(),
                     user.getEmail(),
                     user.getRole().name()
             ));
         } catch (IllegalArgumentException e) {
             // If the password or email is wrong, return a 401 Unauthorized
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshRequest request) {
+        try {
+            RefreshToken refreshToken = refreshTokenService.findByToken(request.refreshToken())
+                    .orElseThrow(() -> new IllegalArgumentException("Refresh token not found."));
 
+            refreshTokenService.verifyExpiration(refreshToken);
+
+            // Using our custom MongoDB literal query override
+            User user = userRepository.findByCustomId(refreshToken.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User associated with token no longer exists."));
+
+            String newToken = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+
+            return ResponseEntity.ok(new AuthResponse(
+                    newToken,
+                    refreshToken.getToken(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getRole().name()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session Error: " + e.getMessage());
+        }
+    }
 }

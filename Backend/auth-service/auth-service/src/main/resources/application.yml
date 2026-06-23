@@ -1,0 +1,15 @@
+
+server:
+  port: 8081
+
+spring:
+    application:
+      name: auth-service
+    data:
+      mongodb:
+        uri: mongodb+srv://sazad3774_db_user:azadMongodb2026@civiclink.xkim187.mongodb.net/?retryWrites=true&w=majority
+
+
+jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    expiration: 86400000
