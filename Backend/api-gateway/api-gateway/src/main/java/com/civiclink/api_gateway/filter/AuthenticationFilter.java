@@ -56,13 +56,24 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 // Mathematically validate the token
                 try {
                     jwtUtil.validateToken(authHeader);
+
+                    String userEmail = jwtUtil.extractEmail(authHeader);
+                    String userRole = jwtUtil.extractRole(authHeader);
+                    org.springframework.http.server.reactive.ServerHttpRequest modifiedRequest = exchange.getRequest()
+                            .mutate()
+                            .header("X-User-Email", userEmail)
+                            .header("X-User-Role", userRole)
+                            .build();
+                    return chain.filter(exchange.mutate().request(modifiedRequest).build());
+
+
                 } catch (Exception e) {
                     System.out.println("Invalid Token Detected: Blocking Request.");
+                    System.out.println("🚨 THE EXACT REASON: " + e.getMessage());
                     exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                     return exchange.getResponse().setComplete();
                 }
             }
-
             // 3. Token is valid (or it's an open endpoint). Let the request pass to the backend!
             return chain.filter(exchange);
         };

@@ -23,6 +23,11 @@ public class GatewayConfig {
                         .path("/api/v1/auth/**")
                         .filters(f -> f.filter(filter.apply(new AuthenticationFilter.Config())))
                         .uri("http://localhost:8081"))
+                .route("issue-service",r-> r
+                        .path("/api/v1/issues/**")
+                        .filters(f -> f.filter(filter.apply(new AuthenticationFilter.Config())))
+                        .uri("http://localhost:8082"))
                 .build();
+
     }
 }
