@@ -1,0 +1,16 @@
+
+server:
+  port: 8082
+
+spring:
+  application:
+    name: issue-service
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: civiclink_issues
+      auto-index-creation: true
+
+aws:
+  s3:
+    bucket-name: civiclink-images-azad-2026
