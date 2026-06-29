@@ -1,0 +1,6 @@
+fastapi==0.110.0
+uvicorn==0.27.1
+ultralytics==8.1.0      # This is YOLOv8 for the Computer Vision Spam Filter
+scikit-learn>=1.4.1 # This is for the K-Means Smart Dispatch Clustering
+openai==1.13.3          # This is for the Function-Calling Chatbot
+python-multipart==0.0.9 # Required for handling image uploads
