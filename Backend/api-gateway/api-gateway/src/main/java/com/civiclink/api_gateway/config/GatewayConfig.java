@@ -31,6 +31,10 @@ public class GatewayConfig {
                         .path("/api/v1/issues/**")
                         .filters(f -> f.filter(filter.apply(new AuthenticationFilter.Config())))
                         .uri("http://localhost:8082"))
+                .route("ai-vision-service",r->r
+                        .path("/api/v1/ai/**")
+                        .filters(f -> f.filter(filter.apply(new AuthenticationFilter.Config())))
+                        .uri("http://localhost:8084"))
                 .build();
 
     }
