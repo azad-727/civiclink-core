@@ -38,6 +38,18 @@ public class IssueController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PatchMapping("/{issueId}/verify")
+    public ResponseEntity<?> verifyIssue(@PathVariable("issueId") String issueId,
+                                         @RequestHeader("X-User-Email") String userEmail){
+        try{
+            Issue verifiedIssue=issueService.verifyIssue(issueId,userEmail);
+            return ResponseEntity.ok(verifiedIssue);
+        }catch(IllegalStateException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }catch(Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @GetMapping("/contributors/top")
     public ResponseEntity<List<Map<String, Object>>> getTopContributors() {
         return ResponseEntity.ok(issueService.getTopContributors());

@@ -98,4 +98,17 @@ public class IssueService {
         return issueRepository.save(issue);
     }
 
+    public Issue verifyIssue(String issueId, String userEmail) {
+        Issue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new IllegalArgumentException("Issue not found with id: " + issueId));
+
+        if (issue.getVerifiedByUsers().contains(userEmail)) {
+            throw new IllegalStateException("You have already verified this issue");
+        }
+
+        issue.getVerifiedByUsers().add(userEmail);
+        issue.setVerificationCount(issue.getVerifiedByUsers().size());
+        return issueRepository.save(issue);
+    }
+
 }
