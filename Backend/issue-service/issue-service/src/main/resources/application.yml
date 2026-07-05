@@ -8,8 +8,6 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI}
-      database: civiclink_issues
-      auto-index-creation: true
 
 aws:
   s3:

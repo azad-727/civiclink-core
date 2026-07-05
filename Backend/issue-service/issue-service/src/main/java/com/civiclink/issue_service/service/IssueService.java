@@ -7,13 +7,18 @@ import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class IssueService {
     private final IssueRepository issueRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public IssueService(IssueRepository issueRepository) {
         this.issueRepository = issueRepository;
@@ -29,13 +34,54 @@ public class IssueService {
 
         GeoJsonPoint geoJsonPoint=new GeoJsonPoint(request.getLongitude(),request.getLatitude());
         issue.setLocation(geoJsonPoint);
-        return issueRepository.save(issue);
+        Issue savedIssue=issueRepository.save(issue);
+        triggerAiValidation(savedIssue.getId(), savedIssue.getImageUrl());
+        return savedIssue;
     }
+
     public List<Issue> getNearByIssues(double longitude, double latitude, double radiusInKm){
         Point centerPoint=new Point(longitude,latitude);
         Distance searchRadius=new Distance(radiusInKm, Metrics.KILOMETERS);
 
         return issueRepository.findByLocationNear(centerPoint,searchRadius);
+    }
+    public List<Map<String, Object>> getTopContributors() {
+        return issueRepository.findTopContributors();
+    }
+    private void triggerAiValidation(String issueId, String imageUrl) {
+        new Thread(() -> {
+            try {
+                // Pointing to your FastAPI server[cite: 9]
+                String aiEngineUrl = "http://civiclink-ai:8084/api/v1/ai/validate-image";
+
+                Map<String, String> requestPayload = new HashMap<>();
+                requestPayload.put("issue_id", issueId); // Matches ValidationRequest[cite: 10]
+                requestPayload.put("image_url", imageUrl); // Matches ValidationRequest[cite: 10]
+
+                ResponseEntity<Map> response = restTemplate.postForEntity(aiEngineUrl, requestPayload, Map.class);
+
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    Map<String, Object> aiData = response.getBody();
+                    boolean isValid = (boolean) aiData.get("is_valid_civic_issue"); //[cite: 10]
+                    double confidence = (double) aiData.get("max_confidence"); //[cite: 10]
+
+                    Issue issueToUpdate = issueRepository.findById(issueId).orElse(null);
+                    if (issueToUpdate != null) {
+                        // Convert confidence (e.g., 0.85) to a 1-10 severity score
+                        issueToUpdate.setAiSeverityScore((int) (confidence * 10));
+
+                        if (isValid) {
+                            issueToUpdate.setStatus("OPEN");
+                        } else {
+                            issueToUpdate.setStatus("REJECTED_BY_AI");
+                        }
+                        issueRepository.save(issueToUpdate);
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("AI Engine unreachable: " + e.getMessage());
+            }
+        }).start();
     }
 
     public Issue updateIssuesStatus(String issueId, String newStatus){

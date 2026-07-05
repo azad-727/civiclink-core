@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class IssueServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IssueServiceApplication.class, args);
+
+        SpringApplication.run(IssueServiceApplication.class, args);
 	}
 
 }

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/issues")
@@ -36,6 +37,10 @@ public class IssueController {
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @GetMapping("/contributors/top")
+    public ResponseEntity<List<Map<String, Object>>> getTopContributors() {
+        return ResponseEntity.ok(issueService.getTopContributors());
     }
     @GetMapping("/nearby")
     public ResponseEntity<List<Issue>> getNearbyIssues(@RequestParam double longitude,

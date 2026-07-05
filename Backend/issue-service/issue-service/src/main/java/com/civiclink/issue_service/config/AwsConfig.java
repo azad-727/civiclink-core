@@ -12,7 +12,7 @@ public class AwsConfig {
     public S3Presigner s3Presigner(){
          return S3Presigner.builder()
                  .credentialsProvider(DefaultCredentialsProvider.create())
-                 .region(Region.AP_SOUTH_1)
+                 .region(Region.EU_NORTH_1)
                  .build();
     }
 }
