@@ -5,7 +5,7 @@ spring:
   application:
     name: routing-service
   neo4j:
-    uri: bolt://localhost:7687
+    uri: ${NEO4J_URI:bolt://neo4j:7687}
     authentication:
-      username: neo4j
-      password: password
+      username: ${NEO4J_USERNAME:neo4j}
+      password: ${NEO4J_PASSWORD}

@@ -18,7 +18,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     private static final List<String> OPEN_ENDPOINTS = List.of(
             "/api/v1/auth/register",
             "/api/v1/auth/login",
-            "/api/v1/auth/refresh"
+            "/api/v1/auth/refresh",
+            "/api/v1/issues/nearby"
     );
 
     public AuthenticationFilter(JwtUtil jwtUtil) {
@@ -30,6 +31,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
+
+            if (exchange.getRequest().getMethod().name().equals("OPTIONS")) {
+                return chain.filter(exchange);
+            }
 
             // 1. Check if the current request is trying to hit an open endpoint
             String path = exchange.getRequest().getURI().getPath();

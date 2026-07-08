@@ -1,0 +1,142 @@
+.footer {
+  background-color: #111827; /* Dark slate color */
+  color: #d1d5db; /* Light gray text */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding-top: 48px;
+  margin-top: auto; /* Pushes footer to the bottom if content is short */
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+/* Brand Section */
+.footer-brand-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.footer-brand-img {
+  height: 32px;
+  width: auto;
+  /* If your logo has a dark background, you might need to adjust this or use a white version */
+}
+
+.footer-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Links Sections */
+.footer-links-section h3,
+.footer-contact-section h3 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.footer-links-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links-section a {
+  text-decoration: none;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.footer-links-section a:hover {
+  color: white;
+}
+
+/* Contact & Socials */
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.social-icons a {
+  color: #9ca3af;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #1f2937;
+}
+
+.social-icons a:hover {
+  color: white;
+  background-color: #374151;
+  transform: translateY(-2px);
+}
+
+/* Bottom Bar */
+.footer-bottom {
+  background-color: #030712;
+  text-align: center;
+  padding: 20px 24px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+/* Responsive Mobile Layout */
+@media (max-width: 992px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  
+  .footer-brand-section {
+    margin-bottom: 16px;
+  }
+}

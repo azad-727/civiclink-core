@@ -1,0 +1,114 @@
+Here is your comprehensive **CivicLink System Context & Architecture Memory File**. You can copy this entire block, save it as a text or markdown file, and feed it into any future prompt so that the system instantly understands the full scope of your backend architecture without needing the raw code files.
+
+---
+
+# CivicLink System Architecture & Context
+
+## 1. System Overview
+
+CivicLink is a microservices-based civic issue reporting and routing platform. The backend is decoupled into three primary services:
+
+* **Issue Management Service (Java/Spring Boot):** Handles core CRUD operations and geospatial queries for civic issues.
+
+
+* **Routing Service (Java/Spring Boot):** Calculates safe travel paths using a graph database.
+
+
+* **AI Cortex Service (Python/FastAPI):** Provides computer vision validation, semantic duplicate detection, and agentic chatbot capabilities.
+
+
+
+## 2. Tech Stack & Databases
+
+* **Primary Backend:** Java with Spring Boot.
+
+
+* **AI Backend:** Python with FastAPI ("CivicLink Cortex").
+
+
+* **Primary Database (Issues):** MongoDB with GeoSpatial indexing (`GeoJsonPoint` and `GeoSpatialIndexType.GEO_2DSPHERE`).
+
+
+* **Graph Database (Routing):** Neo4j for mapping intersections and relationships.
+
+
+* **Cloud Storage:** AWS S3 (Region: AP_SOUTH_1) for direct image uploads via presigned URLs.
+
+
+
+## 3. Core Microservices
+
+### A. Issue Management Service
+
+* **Geospatial Tracking:** Issues are stored in MongoDB as Documents containing precise `latitude` and `longitude` coordinates mapped to `GeoJsonPoint`.
+
+
+* **Proximity Search:** Uses MongoDB's `findByLocationNear` to return issues within a specified radius (in kilometers).
+
+
+* **Status Workflow:** Issues transition between predefined states: `OPEN`, `IN_PROGRESS`, `RESOLVED`, and `REJECTED`.
+
+
+* **Role-Based Security:** Issue status updates require an `ADMIN` role validated via the `X-User-Role` header.
+
+
+* **AWS Integration:** Generates a unique 5-minute AWS S3 presigned URL for the frontend to upload JPEG images directly.
+
+
+
+### B. Safe Routing Service
+
+* **Graph Nodes:** Physical locations are represented as `Intersection` nodes in Neo4j.
+
+
+* **Safe Path Algorithm:** Utilizes a custom Cypher query (`findSafeRoutes`) to find the shortest path (up to 10 hops) between a `startId` and `endId`.
+
+
+* **Hazard Avoidance:** The query explicitly filters out any route edges (relationships) flagged with `hasPothole = true`.
+
+
+
+### C. AI Cortex Service
+
+* **Vision Engine (YOLOv8):** Downloads uploaded images and validates if they contain a real civic issue using an object detection confidence threshold of `> 0.60`.
+
+
+* **Duplicate Detection:** Encodes issue descriptions using `SentenceTransformer` (`all-MiniLM-L6-v2`) and calculates cosine similarity, flagging issues with a similarity score `> 0.75` as potential duplicates.
+
+
+* **Agentic Chatbot:** Powered by Google's `gemini-2.5-flash`. The AI is equipped with a `get_issue_status` tool, allowing it to autonomously fetch real-time issue updates directly from the Java backend API and converse with the user.
+
+
+
+## 4. API Contract Reference
+
+**Issue Service Endpoints:**
+
+* `POST /api/v1/issues`: Creates a new issue. Requires `X-User-Email` header and payload containing title, description, category, lat, lng, and imageLink.
+
+
+* `PATCH /api/v1/issues/{issueId}/status`: Updates issue status. Requires `X-User-Role` header set to "ADMIN".
+
+
+* `GET /api/v1/issues/nearby`: Fetches issues based on `longitude`, `latitude`, and optional `radius`.
+
+
+* `GET /api/v1/issues/storage/presigned-url`: Returns a short-lived AWS S3 upload URL for a provided `filename`.
+
+
+
+**Routing Service Endpoints:**
+
+* `GET /api/v1/routing/safe-path`: Returns a list of safe intersection IDs between a `startId` and `endId`.
+
+
+
+**AI Cortex Endpoints:**
+
+* `POST /api/v1/ai/validate-image`: Accepts an `issue_id` and `image_url` to run YOLOv8 object detection validation.
+
+
+* `POST /api/v1/ai/detect-duplicate`: Accepts a `new_issue` and a list of `recent_issues` to calculate semantic similarity.
+
+
+* `POST /api/v1/ai/chat`: Accepts a `user_message` and returns an AI-generated reply, interacting with the Java backend if necessary.

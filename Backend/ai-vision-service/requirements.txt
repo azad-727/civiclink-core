@@ -1,6 +1,20 @@
 fastapi==0.110.0
-uvicorn==0.27.1
-ultralytics==8.1.0      # This is YOLOv8 for the Computer Vision Spam Filter
-scikit-learn>=1.4.1 # This is for the K-Means Smart Dispatch Clustering
-openai==1.13.3          # This is for the Function-Calling Chatbot
-python-multipart==0.0.9 # Required for handling image uploads
+uvicorn[standard]==0.27.1
+python-multipart==0.0.9
+
+httpx==0.27.0
+python-dotenv==1.0.1
+numpy==1.26.4
+
+# torch is installed separately in the Dockerfile (CPU-only build, via its
+# own --extra-index-url) — do NOT add it here. Putting the PyTorch index
+# in this file makes pip search it for every package below too, causing
+# hash-mismatch errors on packages that exist on both indexes.
+
+opencv-python-headless==4.9.0.80   # headless build: no GUI/highgui deps, lighter than opencv-python
+ultralytics==8.1.28                # YOLOv8 for the computer-vision validation endpoint
+
+sentence-transformers==2.5.1       # duplicate-detection embeddings
+scikit-learn>=1.4.1                # cosine_similarity
+
+google-generativeai==0.4.1         # Gemini agentic chatbot (NOT openai — main.py uses genai, not the OpenAI SDK)

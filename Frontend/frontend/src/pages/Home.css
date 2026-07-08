@@ -1,0 +1,681 @@
+/* src/pages/Home.css */
+
+.home-container {
+  min-height: 100vh;
+  background-color: #F8FAFC;
+  font-family: inherit;
+}
+
+.hero-section {
+  width: 100%;
+  background-color: #F8FAFC;
+  position: relative;
+}
+
+.hero-banner-container {
+  position: relative;
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+}
+
+/* Positions the buttons on top of the image */
+.hero-actions-overlay {
+  position: absolute;
+  top: 75%; /* Adjust this percentage slightly if needed to move buttons up/down */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 16px;
+  z-index: 5;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 24px; /* Slightly tighter padding to match screenshot */
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #637599; /* Matched to the muted blue/purple in the screenshot */
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: #4f5f80;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #1F2937;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background-color: #F9FAFB;
+}
+
+/* SEO & Accessibility Utility Class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* =========================================
+   STATS SECTION
+   ========================================= */
+.stats-section {
+  max-width: 1000px;
+  margin: -60px auto 60px; /* The -60px pulls the white card up over the banner */
+  padding: 0 24px;
+  position: relative;
+  z-index: 10;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border: 1px solid #F3F4F6;
+}
+
+.stat-card {
+  text-align: center;
+  border-right: 1px solid #E5E7EB;
+}
+
+.stat-card:last-child {
+  border-right: none;
+}
+
+.stat-card h3 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #4A72B2;
+  margin-bottom: 8px;
+}
+
+.stat-card p {
+  color: #6B7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =========================================
+   FEATURES SECTION
+   ========================================= */
+.features-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+.features-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.features-header h2 {
+  font-size: 2.2rem;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.features-header p {
+  color: #4B5563;
+  font-size: 1.1rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.feature-card {
+  background: #ffffff;
+  padding: 40px 32px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #F3F4F6;
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  color: #1F2937;
+  margin-bottom: 12px;
+}
+
+.feature-card p {
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+/* Animations */
+.animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section h1 { font-size: 2.5rem; }
+  .stats-grid { grid-template-columns: 1fr; gap: 32px; }
+  .stat-card { border-right: none; border-bottom: 1px solid #E5E7EB; padding-bottom: 24px; }
+  .stat-card:last-child { border-bottom: none; padding-bottom: 0; }
+  /* Add inside the existing @media (max-width: 768px) { ... } block */
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-main-card {
+    min-height: 300px;
+  }
+
+  .features-2x2-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+/* =========================================
+   TOP CONTRIBUTORS GRID STYLING
+   ========================================= */
+.contributors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.contributor-profile-card {
+  background-color: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease;
+}
+
+.contributor-profile-card:hover {
+  transform: translateY(-2px);
+}
+
+.contributor-rank {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contributor-details h4 {
+  font-size: 1rem;
+  color: #111827;
+  margin: 0 0 4px 0;
+  text-transform: capitalize;
+}
+
+.contributor-details p {
+  font-size: 0.85rem;
+  color: #6B7280;
+  margin: 0;
+}
+
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.activity-item {
+  margin-bottom: 16px;
+  border-bottom: 1px solid #F3F4F6;
+  padding-bottom: 12px;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activity-title {
+  display: block;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.activity-meta {
+  font-size: 0.8rem;
+  color: #6B7280;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+   ========================================= */
+/* =========================================
+   MOBILE RESPONSIVENESS
+   ========================================= */
+@media (max-width: 768px) {
+  /* 1. Hero & Base Layout */
+  .hero-section {
+    padding-bottom: 20px;
+    overflow-x: hidden;
+  }
+
+  .hero-actions-overlay {
+    position: static !important; 
+    transform: none !important;
+    margin-top: 24px;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 14px;
+  }
+
+  /* 2. Stats Section */
+  .stats-section {
+    margin-top: 32px;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  .stats-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px;
+  }
+
+  .stat-card {
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 24px;
+  }
+
+  .stat-card:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* 3. Global Headers */
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .section-header h2 {
+    font-size: 1.75rem;
+  }
+
+  /* 4. Dashboard Section Fixes (FORCED STACKING) */
+  .dashboard-section,
+  .platform-features-section,
+  .contributors-section {
+    padding: 40px 16px; 
+    box-sizing: border-box;
+  }
+
+  .dashboard-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px;
+  }
+
+  .dashboard-main-card {
+    min-height: auto !important; 
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px; 
+  }
+
+  .dashboard-card-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-sidebar-card {
+    padding: 24px;
+  }
+
+  /* 5. Features Section Fixes (FORCED STACKING) */
+  .features-2x2-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 40px;
+  }
+
+  .feature-item {
+    display: flex;
+    flex-direction: column !important; /* Stacks the icon above the text on mobile */
+    align-items: flex-start;
+    gap: 16px;
+  }
+}
+/* =========================================
+   GLOBAL SECTION HEADERS
+   ========================================= */
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.section-header h2 {
+  font-size: 2.2rem;
+  color: #111827;
+  margin-bottom: 12px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.section-header p {
+  color: #4B5563;
+  font-size: 1.1rem;
+}
+
+/* =========================================
+   LIVE ISSUES DASHBOARD
+   ========================================= */
+.dashboard-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 24px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.dashboard-main-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+  border: 1px solid #F3F4F6;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: Very subtle background pattern or gradient for the main card */
+.dashboard-main-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(74,114,178,0.03) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+
+.dashboard-card-content h2 {
+  font-size: 2.2rem;
+  color: #111827;
+  margin-bottom: 24px;
+  line-height: 1.3;
+}
+
+.btn-solid-blue {
+  display: inline-block;
+  background-color: #5572F5; /* Exact match to the screenshot button */
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+.btn-solid-blue:hover {
+  opacity: 0.9;
+}
+
+.dashboard-legend {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #4B5563;
+  font-weight: 500;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-blue { background-color: #5572F5; }
+.dot-orange { background-color: #F59E0B; }
+.dot-green { background-color: #10B981; }
+
+.dashboard-sidebar-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #F3F4F6;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.sidebar-header h3 {
+  font-size: 1.25rem;
+  color: #111827;
+}
+
+.sidebar-icons {
+  display: flex;
+  gap: 12px;
+  color: #9CA3AF;
+}
+
+.loading-text {
+  text-align: center;
+  color: #6B7280;
+  font-size: 0.9rem;
+  margin-top: 40px;
+}
+
+/* =========================================
+   PLATFORM FEATURES
+   ========================================= */
+.platform-features-section {
+  background-color: #ffffff;
+  padding: 80px 24px;
+  border-top: 1px solid #F3F4F6;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.features-2x2-grid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px 40px;
+}
+
+.feature-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.feature-icon-wrapper {
+  background-color: #F0F4FF; /* Very light blue background for icons */
+  padding: 12px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-icon-wrapper svg {
+  width: 24px;
+  height: 24px;
+}
+
+.feature-text h4 {
+  font-size: 1.15rem;
+  color: #111827;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.feature-text p {
+  color: #4B5563;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* =========================================
+   TOP CONTRIBUTORS
+   ========================================= */
+.contributors-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 24px 120px;
+}
+
+/* --- MAP BACKGROUND STYLES --- */
+.dashboard-main-card {
+  /* Existing styles (keep these) */
+  background-color: #111827; /* Fallback dark background */
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+  border: 1px solid #F3F4F6;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Position the map absolutely behind everything */
+.map-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  /* Grayscale makes it look like a sleek UI element instead of a messy standard map */
+  filter: grayscale(100%) contrast(1.2) opacity(0.6); 
+  pointer-events: none; /* Prevents scrolling the map by accident when trying to scroll the page */
+}
+
+/* Gradient overlay to make the white text pop */
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.6) 0%, rgba(17, 24, 39, 0.1) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Bring text to the front */
+.relative-z {
+  position: relative;
+  z-index: 3;
+}
+
+/* Overwrite text colors to white so they contrast with the dark map */
+.dashboard-main-card h2 {
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Helps readability */
+}
+
+.dashboard-legend .legend-item {
+  color: #F3F4F6;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}

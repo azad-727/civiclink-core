@@ -97,6 +97,15 @@ public class IssueService {
         issue.setStatus(upperStatus);
         return issueRepository.save(issue);
     }
+    public Issue getIssueDetails(String issueId){
+        Issue request=issueRepository.findById(issueId)
+                .orElseThrow(()->new IllegalArgumentException("Issue not found"));
+        return request;
+    }
+    public List<Issue> getUserReportedIssues(String emailId){
+        List<Issue> issues=issueRepository.findByReportedBy(emailId);
+        return issues;
+    }
 
     public Issue verifyIssue(String issueId, String userEmail) {
         Issue issue = issueRepository.findById(issueId)

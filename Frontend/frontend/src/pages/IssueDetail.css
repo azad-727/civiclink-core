@@ -1,0 +1,241 @@
+.issue-detail-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f8f9fa; /* Light background from UI */
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.back-button:hover {
+  text-decoration: underline;
+}
+
+.issue-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+/* CSS Grid for Responsive Layout */
+.issue-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Desktop: 66% left, 33% right */
+  gap: 32px;
+}
+
+/* --- Left Column (Gallery & Text) --- */
+.image-gallery {
+  margin-bottom: 24px;
+}
+
+.gallery-thumbnails {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.thumbnail {
+  height: 200px;
+  width: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.thumbnail.active {
+  opacity: 1;
+  border: 3px solid #4f46e5;
+}
+
+.no-image-placeholder {
+  height: 300px;
+  background-color: #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.issue-description-section h3 {
+  font-size: 1.2rem;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.issue-description-text {
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* --- Right Column (Info Card) --- */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.map-preview-wrapper {
+  height: 200px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background-color: #e5e7eb;
+}
+
+.static-map-preview {
+  height: 100%;
+  width: 100%;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.verify-button {
+  flex: 1;
+  background-color: #1d6ded;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.verify-button:hover {
+  background-color: #4338ca;
+}
+
+.verification-badge {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #374151;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0;
+}
+
+.submitter-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.submitter-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1f2937;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.submitted-by {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.submitted-date {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.meta-info p {
+  margin: 8px 0;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.status-badge.open, .status-badge.under.review {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.resolved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 768px) {
+  .issue-content-grid {
+    grid-template-columns: 1fr; /* Stack into a single column */
+  }
+
+  .issue-title {
+    font-size: 1.8rem;
+  }
+
+  /* In mobile, the sidebar content usually appears below the images but above the description */
+  .issue-main-col {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .image-gallery {
+    order: 1;
+  }
+  
+  /* We visually re-order the description to flow below the info card on mobile */
+  .issue-description-section {
+    order: 3;
+    margin-top: 24px;
+  }
+
+  .issue-sidebar-col {
+    order: 2;
+  }
+  
+  .thumbnail {
+    width: 140px;
+    height: 140px;
+  }
+}

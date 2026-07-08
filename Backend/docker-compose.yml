@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # 1. Auth Service (Java / Spring Boot)
+  auth-service:
+    build:
+      context: ./auth-service/auth-service
+      dockerfile: Dockerfile
+    container_name: civiclink-auth
+    ports:
+      - "8081:8081"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    networks:
+      - civiclink-network
+
+  # 2. Issue Service (Java / Spring Boot)
+  issue-service:
+    build:
+      context: ./issue-service/issue-service
+      dockerfile: Dockerfile
+    container_name: civiclink-issue
+    ports:
+      - "8082:8082"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+    networks:
+      - civiclink-network
+
+  # 3. API Gateway (Java / Spring Boot — routing & security)
+  api-gateway:
+    build:
+      context: ./api-gateway/api-gateway
+      dockerfile: Dockerfile
+    container_name: civiclink-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - auth-service
+      - issue-service
+      - ai-vision-service
+      - routing-service
+    networks:
+      - civiclink-network
+
+  # 4. AI Cortex (Python / FastAPI)
+  ai-vision-service:
+    build:
+      context: ./ai-vision-service
+      dockerfile: Dockerfile
+    container_name: civiclink-ai
+    ports:
+      - "8084:8084"
+    env_file:
+      - ./ai-vision-service/.env   # GEMINI_API_KEY only — no OpenAI key is used
+    networks:
+      - civiclink-network
+
+  # 5. Neo4j (graph database for routing-service)
+  neo4j:
+    image: neo4j:5
+    container_name: civiclink-neo4j
+    ports:
+      - "7474:7474"   # Neo4j browser UI (useful for seeding/inspecting data)
+      - "7687:7687"   # Bolt protocol — what routing-service actually talks to
+    environment:
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD}
+    volumes:
+      - neo4j-data:/data
+    networks:
+      - civiclink-network
+
+  # 6. Routing Service (Java / Spring Boot — Neo4j-backed safe-path routing)
+  routing-service:
+    build:
+      context: ./routing-service/routing-service
+      dockerfile: Dockerfile
+    container_name: civiclink-routing
+    ports:
+      - "8083:8083"
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    depends_on:
+      - neo4j
+    networks:
+      - civiclink-network
+
+# Custom bridge network so every service can reach the others by name
+# (e.g. http://api-gateway:8080, http://ai-vision-service:8084)
+networks:
+  civiclink-network:
+    driver: bridge
+
+volumes:
+  neo4j-data:

@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class AuthServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AuthServiceApplication.class, args);
+
+        System.out.println("DEBUG MONGO_URI = " + System.getenv("MONGO_URI"));
+        SpringApplication.run(AuthServiceApplication.class, args);
 	}
 
 }

@@ -6,6 +6,7 @@
 *.iml
 target/
 *.class
+*.env
 *.jar
 *.war
 pom.xml.tag

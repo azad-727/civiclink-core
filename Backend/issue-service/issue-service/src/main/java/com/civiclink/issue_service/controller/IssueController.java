@@ -25,6 +25,16 @@ public class IssueController {
         Issue issue=issueService.createIssue(request,userEmailId);
         return ResponseEntity.ok(issue);
     }
+    @GetMapping("/{issueId}")
+    public ResponseEntity<Issue> issueDetails(@PathVariable ("issueId") String issueId){
+        Issue issue=issueService.getIssueDetails(issueId);
+        return ResponseEntity.ok(issue);
+    }
+    @GetMapping("profile")
+    public ResponseEntity <List<Issue>> getUserIssues(@RequestHeader ("X-User-Email") String emailId){
+        List<Issue> issues=issueService.getUserReportedIssues(emailId);
+        return ResponseEntity.ok(issues);
+    }
     @PatchMapping("/{issueId}/status")
     public ResponseEntity<?> updateStatus(@PathVariable("issueId") String id, @RequestParam("status") String status,
                                           @RequestHeader("X-User-Role") String userRole){

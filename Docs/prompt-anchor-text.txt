@@ -1,0 +1,14 @@
+SYSTEM CONTEXT OVERRIDE
+We are building the frontend for CivicLink, a polyglot civic issue reporting platform. The backend (Java Spring Boot + Python AI Cortex) is complete. We are targeting an Amazon SDE I system design level of quality.
+
+Tech Stack React (Vite), Axios, React Router, Lucide-React.
+
+Strict Engineering Mandates for all UIUX
+
+Mobile-First Architecture All components must be designed for small screens first (touch targets, stacked flex layouts) and scale up to desktop.
+
+Uncluttered Aesthetic Crisp white backgrounds, sharp contrast, zero visual noise. Let the civic data be the focus.
+
+Production-Grade Resilience Every component must inherently include loading states, skeleton loaders, and elegant error boundaries for networkbackend failures.
+
+Acknowledge this context and wait for my next component request.

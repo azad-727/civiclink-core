@@ -1,0 +1,17 @@
+1. The SPOF Trap (Single Point of Failure)
+The Interviewer: "If 100% of your network traffic goes through Port 8080, doesn't that mean if your API Gateway crashes, your entire application goes down?"
+
+Your Answer: "Yes, an API Gateway introduces a Single Point of Failure. To mitigate this in a production environment, we do not run just one Gateway. We deploy multiple instances of the API Gateway across different server availability zones and put them behind a Cloud Load Balancer (like AWS ALB). If one Gateway container crashes, the load balancer instantly reroutes traffic to the surviving instances."
+
+2. The Latency Trap
+The Interviewer: "You added a middleman. Your React app has to hit the Gateway, which then hits the Auth Service. Doesn't that extra network hop make your app slower?"
+
+Your Answer: "It does introduce a minor network hop latency, usually single-digit milliseconds. However, the architectural tradeoff is worth it. Furthermore, I specifically built this Gateway using Spring Cloud Gateway's Reactive WebFlux engine (Netty) rather than standard Spring WebMVC. Because it is non-blocking and asynchronous, it can handle thousands of concurrent routing requests with an incredibly small memory footprint, minimizing the latency penalty."
+(Note: Remember that bug we fought where Maven couldn't find the webmvc dependency? That was because we were forcing the bleeding-edge Reactive engine!)
+
+3. The Security Duplication Trap
+The Interviewer: "Why did you put the JWT validation in the Gateway? Why not just let the Issue Core Service check the token itself?"
+
+Your Answer: "Centralization and DRY (Don't Repeat Yourself) principles. If I have 15 microservices, and I put the security logic in the microservices, I have to copy-paste the exact same JWT validation code 15 times. If a vulnerability is found in the JWT library, I have to update 15 repositories. By putting it in the Gateway, the internal microservices are completely shielded from the public internet. They only accept traffic from the Gateway, so they can focus 100% on business logic."
+
+This architecture proves you aren't just building a toy app—you are building an enterprise-grade distributed system.

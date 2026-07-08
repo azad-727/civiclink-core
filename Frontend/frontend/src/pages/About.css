@@ -1,0 +1,225 @@
+/* src/pages/About.css */
+
+.about-page-container {
+  min-height: 100vh;
+  background-color: #F8FAFC; /* Matches your auth page aesthetic */
+  padding: 60px 24px;
+  font-family: inherit;
+}
+
+.about-hero {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 60px auto;
+}
+
+.about-hero h1 {
+  font-size: 3rem;
+  color: #111827;
+  margin-bottom: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.about-hero p {
+  font-size: 1.25rem;
+  color: #4B5563;
+  line-height: 1.6;
+}
+
+.about-content-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Grid Layout for Vision & Mission */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .about-grid {
+    grid-template-columns: 1fr 1fr; /* 2 columns on desktop */
+  }
+}
+
+.about-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #F3F4F6;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.about-card h2 {
+  color: #1F2937;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.about-card p {
+  color: #6B7280;
+  line-height: 1.7;
+}
+
+/* Profile Card Styling */
+.profile-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .profile-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 48px;
+    gap: 48px;
+  }
+}
+
+/* Subtle background decoration for the profile card */
+.profile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(74, 114, 178, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 0 0 0 100%;
+  pointer-events: none;
+}
+
+.profile-image-container {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-photo {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #ffffff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+.profile-info {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.developer-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4A72B2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.profile-info h2 {
+  font-size: 2.2rem;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.profile-info p {
+  font-size: 1.1rem;
+  color: #4B5563;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+/* Clean, modern buttons for social links */
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.github-btn {
+  background-color: #1F2937;
+  color: #ffffff;
+}
+
+.github-btn:hover {
+  background-color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.linkedin-btn {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.linkedin-btn:hover {
+  background-color: #dbeafe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+/* Animations */
+.animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; opacity: 0; }
+.animate-slide-in-left { animation: slideInLeft 0.6s ease forwards; opacity: 0; }
+.animate-slide-in-right { animation: slideInRight 0.6s ease forwards; opacity: 0; }
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
