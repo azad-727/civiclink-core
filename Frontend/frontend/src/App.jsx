@@ -1,5 +1,12 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
+// Smart root redirect: sends logged-in users to /home, guests to /login
+function RootRedirect() {
+  const { isAuthenticated } = useAuth();
+  return <Navigate to={isAuthenticated ? '/home' : '/login'} replace />;
+}
 import { AuthProvider } from './context/AuthContext'; 
 
 import AppLayout from './layouts/AppLayout'; 
@@ -25,6 +32,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<AppLayout />}>
             
+            {/* ROOT: Smart redirect based on auth state */}
+            <Route index element={<RootRedirect />} />
+
             {/* PUBLIC ROUTES: Anyone can access these */}
             <Route path="home" element={<Home />} />
             <Route path="explore" element={<ExploreMap />} />

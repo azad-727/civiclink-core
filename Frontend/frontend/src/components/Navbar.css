@@ -5,9 +5,9 @@
   border-bottom: 1px solid #E5E7EB;
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1100; /* Above map sidebar (1000) and mobile menu (1099) */
   width: 100%;
-  height: 70px; /* Fixed height is crucial for the bottom border alignment */
+  height: 70px;
 }
 
 .nav-container {
@@ -153,16 +153,17 @@
   .mobile-menu {
     display: flex;
     flex-direction: column;
-    position: absolute;
+    position: fixed;
     top: 70px;
     left: 0;
     width: 100%;
     background-color: #ffffff;
     border-bottom: 1px solid #E5E7EB;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-in-out;
+    z-index: 1099; /* Above ExploreMap sidebar z-index: 1000 */
   }
 
   .mobile-menu.open {

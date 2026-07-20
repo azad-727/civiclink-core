@@ -2,7 +2,7 @@
 
 .chat-widget-root {
   position: fixed;
-  bottom: 24px;
+  bottom: 100px;  /* Raised high enough to clear the map recenter button (bottom: 32px + 48px height + gap) */
   right: 24px;
   z-index: 100;
   display: flex;
@@ -208,7 +208,7 @@
 /* Mobile */
 @media (max-width: 480px) {
   .chat-widget-root {
-    bottom: 16px;
+    bottom: 100px; /* Raised to clear map toggle button on mobile */
     right: 16px;
   }
 

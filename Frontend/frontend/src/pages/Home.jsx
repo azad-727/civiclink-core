@@ -142,11 +142,26 @@ export default function Home() {
                     <li key={issue.id} className="activity-item">
                       <Link 
                         to={`/issue/${issue.id}`} 
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                        style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '12px' }}
                       >
-                      <strong className="activity-title">{issue.title}</strong>
-                      <span className="activity-meta">{issue.category} • {issue.status}</span>
-                    </Link>
+                        {/* Issue thumbnail */}
+                        <div className="activity-thumb">
+                          {issue.imageUrl ? (
+                            <img 
+                              src={issue.imageUrl} 
+                              alt={issue.title} 
+                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                            />
+                          ) : null}
+                          <div className="activity-thumb-fallback" style={{ display: issue.imageUrl ? 'none' : 'flex' }}>
+                            📍
+                          </div>
+                        </div>
+                        <div>
+                          <strong className="activity-title">{issue.title}</strong>
+                          <span className="activity-meta">{issue.category} • {issue.status}</span>
+                        </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>

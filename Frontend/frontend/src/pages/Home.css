@@ -305,6 +305,33 @@
 .activity-meta {
   font-size: 0.8rem;
   color: #6B7280;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Activity Thumbnail */
+.activity-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: #F3F4F6;
+}
+
+.activity-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.activity-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background-color: #EFF6FF;
 }
 
 /* =========================================

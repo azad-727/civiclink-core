@@ -51,7 +51,7 @@ export default function Footer() {
             <Mail size={16} /> support@civiclink.com
           </p>
           <p className="contact-item">
-            <MapPin size={16} /> Civic Innovation Hub, City Center
+            <MapPin size={16} /> At Every Citizen Hearts.
           </p>
           
           <div className="social-icons">

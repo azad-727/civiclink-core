@@ -33,6 +33,7 @@ export default function IssueDetail() {
   const [issue, setIssue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasVerified, setHasVerified] = useState(false);
   
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -58,12 +59,18 @@ export default function IssueDetail() {
   }, [id]);
 
   const handleVerify = async () => {
+    if (hasVerified) return;
     try {
       await apiClient.patch(`/issues/${id}/verify`);
       setIssue(prev => ({ ...prev, verificationCount: (prev.verificationCount || 0) + 1 }));
-      alert("Verification successful!");
+      setHasVerified(true);
     } catch (err) {
-      alert("Failed to verify or already verified.");
+      // 409 Conflict means user already verified this issue
+      if (err?.status === 409 || err?.message?.includes('409') || err?.message?.toLowerCase().includes('already')) {
+        setHasVerified(true);
+      } else {
+        alert('Failed to verify. Please try again.');
+      }
     }
   };
 
@@ -158,8 +165,12 @@ export default function IssueDetail() {
             </div>
 
             <div className="action-row">
-              <button className="verify-button" onClick={handleVerify}>
-                ✓ Verify Issue
+              <button 
+                className={`verify-button ${hasVerified ? 'verified' : ''}`} 
+                onClick={handleVerify}
+                disabled={hasVerified}
+              >
+                {hasVerified ? '✓ Already Verified' : '✓ Verify Issue'}
               </button>
               <div className="verification-badge" title="Citizens Verified">
                 <span className="count">{issue.verificationCount || 0}</span>
