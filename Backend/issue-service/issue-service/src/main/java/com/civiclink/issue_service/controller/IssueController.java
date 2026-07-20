@@ -5,6 +5,7 @@ import com.civiclink.issue_service.model.Issue;
 import com.civiclink.issue_service.service.IssueService;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +17,9 @@ import java.util.Map;
 @RequestMapping("/api/v1/issues")
 public class IssueController {
 
+    @Autowired
     private IssueService issueService;
-    public IssueController(IssueService issueService){
-        this.issueService=issueService;
-    }
+
     @PostMapping()
     public ResponseEntity<Issue> reportIssue(@Valid @RequestBody IssueRequest request,@RequestHeader("X-User-Email") String userEmailId){
         Issue issue=issueService.createIssue(request,userEmailId);
@@ -38,8 +38,8 @@ public class IssueController {
     @PatchMapping("/{issueId}/status")
     public ResponseEntity<?> updateStatus(@PathVariable("issueId") String id, @RequestParam("status") String status,
                                           @RequestHeader("X-User-Role") String userRole){
-        if(!"ADMIN".equalsIgnoreCase(userRole)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only admin can update issue status");
+        if(!isAmcOrAdmin(userRole)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only AMC officers or admins can update issue status");
         }
         try{
             Issue updatedIssue=issueService.updateIssuesStatus(id,status);
@@ -47,6 +47,29 @@ public class IssueController {
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllIssuesForAdmin(@RequestParam(value = "status", required = false) String status,
+                                                  @RequestParam(value = "category", required = false) String category,
+                                                  @RequestHeader("X-User-Role") String userRole){
+        if(!isAmcOrAdmin(userRole)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only AMC officers or admins can view all issues");
+        }
+        List<Issue> issues = issueService.getIssuesForAdmin(status, category);
+        return ResponseEntity.ok(issues);
+    }
+
+    @GetMapping("/admin/stats")
+    public ResponseEntity<?> getAdminStats(@RequestHeader("X-User-Role") String userRole){
+        if(!isAmcOrAdmin(userRole)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only AMC officers or admins can view stats");
+        }
+        return ResponseEntity.ok(issueService.getAdminStats());
+    }
+
+    private boolean isAmcOrAdmin(String userRole){
+        return "ADMIN".equalsIgnoreCase(userRole) || "AMC_OFFICER".equalsIgnoreCase(userRole);
     }
     @PatchMapping("/{issueId}/verify")
     public ResponseEntity<?> verifyIssue(@PathVariable("issueId") String issueId,

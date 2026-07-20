@@ -23,6 +23,23 @@ public interface IssueRepository extends MongoRepository<Issue,String> {
     })
     List<Map<String, Object>> findTopContributors();
 
+    List<Issue> findAllByOrderByCreatedAtDesc();
+    List<Issue> findByStatusOrderByCreatedAtDesc(String status);
+    List<Issue> findByCategoryOrderByCreatedAtDesc(String category);
+    List<Issue> findByStatusAndCategoryOrderByCreatedAtDesc(String status, String category);
+
+    @Aggregation(pipeline = {
+            "{ '$group': { '_id': '$status', 'count': { '$sum': 1 } } }",
+            "{ '$project': { 'status': '$_id', 'count': 1, '_id': 0 } }"
+    })
+    List<Map<String, Object>> countIssuesByStatus();
+
+    @Aggregation(pipeline = {
+            "{ '$group': { '_id': '$category', 'count': { '$sum': 1 } } }",
+            "{ '$project': { 'category': '$_id', 'count': 1, '_id': 0 } }"
+    })
+    List<Map<String, Object>> countIssuesByCategory();
+
 
 }
 
