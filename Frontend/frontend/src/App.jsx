@@ -14,7 +14,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // <-- Import the Boun
 import AdminRoute from './components/AdminRoute'; // <-- Role-gated bouncer (AMC_OFFICER / ADMIN)
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
-import SignUp from './pages/SignUp';
+import SignUp from './pages/Signup';
 
 const About = React.lazy(() => import('./pages/About'));
 const AmcDashboard = React.lazy(() => import('./pages/AmcDashboard'));
