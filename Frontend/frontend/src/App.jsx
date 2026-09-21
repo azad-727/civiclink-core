@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
@@ -11,46 +11,54 @@ import { AuthProvider } from './context/AuthContext';
 
 import AppLayout from './layouts/AppLayout'; 
 import ProtectedRoute from './components/ProtectedRoute'; // <-- Import the Bouncer
+import AdminRoute from './components/AdminRoute'; // <-- Role-gated bouncer (AMC_OFFICER / ADMIN)
 import NotFound from './pages/NotFound';
-import About from './pages/About';
-// Pages
-// import Home from './pages/Home'; // (Placeholder if you haven't built yet)
-// import Discover from './pages/Discover'; // (Placeholder if you haven't built yet)
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import ReportIssue from './pages/ReportIssue';
-import Profile from './pages/Profile'; // <-- Import the Profile
-import Home from './pages/Home';
-import ExploreMap from './pages/ExploreMap';
-import IssueDetail from './pages/IssueDetail';
+
+const About = React.lazy(() => import('./pages/About'));
+const AmcDashboard = React.lazy(() => import('./pages/AmcDashboard'));
+const ReportIssue = React.lazy(() => import('./pages/ReportIssue'));
+const Profile = React.lazy(() => import('./pages/Profile'));
+const Home = React.lazy(() => import('./pages/Home'));
+const ExploreMap = React.lazy(() => import('./pages/ExploreMap'));
+const IssueDetail = React.lazy(() => import('./pages/IssueDetail'));
+
 const Placeholder = ({ title }) => <div className="p-12 text-center text-2xl font-bold">{title}</div>;
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AppLayout />}>
-            
-            {/* ROOT: Smart redirect based on auth state */}
-            <Route index element={<RootRedirect />} />
+        <Suspense fallback={<div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'80vh'}}>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<AppLayout />}>
+              
+              {/* ROOT: Smart redirect based on auth state */}
+              <Route index element={<RootRedirect />} />
 
-            {/* PUBLIC ROUTES: Anyone can access these */}
-            <Route path="home" element={<Home />} />
-            <Route path="explore" element={<ExploreMap />} />
-            <Route path="issue/:id" element={<IssueDetail />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<SignUp />} />
-            <Route path="about" element={<About />} />
-            
-            {/* SECURE ROUTES: Requires Authentication */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="report" element={<ReportIssue />} />
-              <Route path="profile" element={<Profile />} />
+              {/* PUBLIC ROUTES: Anyone can access these */}
+              <Route path="home" element={<Home />} />
+              <Route path="explore" element={<ExploreMap />} />
+              <Route path="issue/:id" element={<IssueDetail />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<SignUp />} />
+              <Route path="about" element={<About />} />
+              
+              {/* SECURE ROUTES: Requires Authentication */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="report" element={<ReportIssue />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+
+              {/* ADMIN ROUTES: Requires AMC_OFFICER or ADMIN role */}
+              <Route element={<AdminRoute />}>
+                <Route path="admin/issues" element={<AmcDashboard />} />
+              </Route>
             </Route>
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </AuthProvider>
   );

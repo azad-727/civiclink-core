@@ -20,6 +20,9 @@ buld/
 dist/
 .env
 .env.local
+.env.development
+.env.production
+.rar
 
 #--- OS Generated File
 

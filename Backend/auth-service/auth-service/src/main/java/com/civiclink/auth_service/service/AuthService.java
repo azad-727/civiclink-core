@@ -5,50 +5,48 @@ import com.civiclink.auth_service.dto.RegisterRequest;
 import com.civiclink.auth_service.model.Role;
 import com.civiclink.auth_service.model.User;
 import com.civiclink.auth_service.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    AuthService(UserRepository userRepo,PasswordEncoder encoder){
-        this.passwordEncoder=encoder;
-        this.userRepo=userRepo;
+    AuthService(UserRepository userRepo, PasswordEncoder encoder) {
+        this.passwordEncoder = encoder;
+        this.userRepo = userRepo;
     }
 
-    public User registerUser(RegisterRequest request){
-        if(userRepo.existsByEmail(request.email())){
+    public User registerUser(RegisterRequest request) {
+        if (userRepo.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Email is already in use");
         }
-        String hashedPassword=passwordEncoder.encode(request.password());
-        User newUser=new User(request.email(),request.username(),hashedPassword, Role.CITIZEN);
-
+        String hashedPassword = passwordEncoder.encode(request.password());
+        User newUser = new User(request.email(), request.username(), hashedPassword, Role.CITIZEN);
         return userRepo.save(newUser);
     }
 
-    public User authenticateUser(LoginRequest request){
-        System.out.println("--- LOGIN ATTEMPT ---");
-        System.out.println("1. Incoming email: [" + request.email() + "]");
-        System.out.println("2. Incoming password: [" + request.password() + "]");
+    public User authenticateUser(LoginRequest request) {
+        log.info("Login attempt for email: {}", request.email());
 
-        User user=userRepo.findByEmail(request.email())
+        User user = userRepo.findByEmail(request.email())
+                .orElseThrow(() -> {
+                    log.warn("Login failed: email not found — {}", request.email());
+                    return new IllegalArgumentException("Invalid email or password.");
+                });
 
-                .orElseThrow(()->{
-                    System.out.println("-> ERROR: Email not found in the MongoDB database.");
-                    return new IllegalArgumentException("Invalid email or password.");});
-
-        System.out.println("3. User found in DB! Assigned Role: " + user.getRole());
-        System.out.println("4. Stored DB Hash: " + user.getPasswordHash());
-
-        if(!passwordEncoder.matches(request.password(),user.getPasswordHash())){
-            System.out.println("-> ERROR: BCrypt rejects the password match.");
-                    throw new IllegalArgumentException("Invalid email or password.");
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            log.warn("Login failed: password mismatch for email — {}", request.email());
+            throw new IllegalArgumentException("Invalid email or password.");
         }
-        System.out.println("-> SUCCESS: Password matches! Issuing token...");
+
+        log.info("Login successful for email: {}", request.email());
         return user;
     }
-
 }

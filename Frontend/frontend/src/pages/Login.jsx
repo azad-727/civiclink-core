@@ -52,7 +52,7 @@ export default function Login() {
         
         {/* LEFT PANEL: Banner & Branding */}
         <div className="auth-banner">
-          <img src="images/logo_wbg.png" alt="CivicLink Logo" className="auth-logo" />
+          <img src="/images/logo_wbg.png" alt="CivicLink Logo" className="auth-logo" />
           <div className="auth-banner-content">
             <h1>
               Connecting Communities.<br />

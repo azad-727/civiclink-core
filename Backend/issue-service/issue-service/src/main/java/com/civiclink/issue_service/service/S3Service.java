@@ -15,26 +15,33 @@ public class S3Service {
     private final S3Presigner s3Presigner;
 
     @Value("${aws.s3.bucket-name}")
-    private  String bucketName;
+    private String bucketName;
 
-    public S3Service(S3Presigner s3Presigner){
-        this.s3Presigner=s3Presigner;
+    public S3Service(S3Presigner s3Presigner) {
+        this.s3Presigner = s3Presigner;
     }
 
-    public  String generatePresignedUploadUrl(String originalFileName){
-        String uniqueFileName = UUID.randomUUID()+"_"+originalFileName;
+    /**
+     * Generates a presigned S3 PUT URL for direct browser upload.
+     * @param originalFileName the original file name from the user
+     * @param contentType the MIME type (e.g. "image/jpeg", "image/png", "image/webp")
+     * @return the presigned upload URL (valid for 5 minutes)
+     */
+    public String generatePresignedUploadUrl(String originalFileName, String contentType) {
+        String uniqueFileName = UUID.randomUUID() + "_" + originalFileName;
 
-        PutObjectRequest objectRequest=PutObjectRequest.builder()
+        PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(uniqueFileName)
-                .contentType("image/jpeg")
+                .contentType(contentType != null ? contentType : "image/jpeg")
                 .build();
 
-        PutObjectPresignRequest presignRequest=PutObjectPresignRequest.builder()
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(5))
                 .putObjectRequest(objectRequest)
                 .build();
-        PresignedPutObjectRequest presignedPutObjectRequest=s3Presigner.presignPutObject(presignRequest);
+
+        PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(presignRequest);
         return presignedPutObjectRequest.url().toString();
     }
 }

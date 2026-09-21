@@ -38,7 +38,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             // 1. Check if the current request is trying to hit an open endpoint
             String path = exchange.getRequest().getURI().getPath();
-            boolean isOpenEndpoint = OPEN_ENDPOINTS.stream().anyMatch(path::contains);
+            boolean isOpenEndpoint = OPEN_ENDPOINTS.stream().anyMatch(path::startsWith);
 
             // 2. If it is NOT an open endpoint, we strictly enforce security
             if (!isOpenEndpoint) {

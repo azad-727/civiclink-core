@@ -11,4 +11,4 @@ spring:
 
 aws:
   s3:
-    bucket-name: civiclink-images-azad-2026
+    bucket-name: ${AWS_BUCKET_NAME}

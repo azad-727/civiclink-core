@@ -50,7 +50,7 @@ public class IssueController {
     }
 
     @GetMapping("/admin/all")
-    public ResponseEntity<?> getAllIssuesForAdmin(@RequestParam(value = "status", required = false) String status,
+        public ResponseEntity<?> getAllIssuesForAdmin(@RequestParam(value = "status", required = false) String status,
                                                   @RequestParam(value = "category", required = false) String category,
                                                   @RequestHeader("X-User-Role") String userRole){
         if(!isAmcOrAdmin(userRole)){

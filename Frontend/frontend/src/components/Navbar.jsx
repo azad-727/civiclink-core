@@ -8,8 +8,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const { isAuthenticated } = useAuth(); 
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+  const isAmcOrAdmin = ['ADMIN', 'AMC_OFFICER'].includes(user?.role?.toUpperCase());
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -36,7 +37,7 @@ export default function Navbar() {
         
         <div className="nav-left">
           <Link to="/" className="nav-brand" onClick={closeMobileMenu}>
-            <img src="images/logo_wbg.png" alt="CivicLink Logo" className="brand-logo" />
+            <img src="/images/logo_wbg.png" alt="CivicLink Logo" className="brand-logo" />
             <span className="brand-text">CivicLink</span>
           </Link>
 
@@ -45,6 +46,9 @@ export default function Navbar() {
             <li><NavLink to="/explore" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Discover</NavLink></li>
             <li><NavLink to="/report" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Submit Issue</NavLink></li>
             <li><NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>About Us</NavLink></li>
+            {isAmcOrAdmin && (
+              <li><NavLink to="/admin/issues" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>AMC Panel</NavLink></li>
+            )}
           </ul>
         </div>
 
@@ -109,6 +113,9 @@ export default function Navbar() {
           <li><NavLink to="/explore" onClick={closeMobileMenu} className={({ isActive }) => isActive ? "mobile-link active" : "mobile-link"}>Discover</NavLink></li>
           <li><NavLink to="/report" onClick={closeMobileMenu} className={({ isActive }) => isActive ? "mobile-link active" : "mobile-link"}>Submit Issue</NavLink></li>
           <li><NavLink to="/about" onClick={closeMobileMenu} className={({ isActive }) => isActive ? "mobile-link active" : "mobile-link"}>About Us</NavLink></li>
+          {isAmcOrAdmin && (
+            <li><NavLink to="/admin/issues" onClick={closeMobileMenu} className={({ isActive }) => isActive ? "mobile-link active" : "mobile-link"}>AMC Panel</NavLink></li>
+          )}
         </ul>
         <div className="mobile-actions">
           {isAuthenticated ? (

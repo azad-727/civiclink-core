@@ -114,7 +114,8 @@ async def civic_chat(request: ChatRequest):
                     # "api-gateway" resolves via Docker's internal DNS on the
                     # civiclink-network bridge — "localhost" would only ever
                     # reach this same container, never api-gateway's.
-                    java_response = await http_client.get(f"http://api-gateway:8080/api/v1/issues/{target_issue_id}")
+                    gateway_url = os.environ.get("API_GATEWAY_URL", "http://api-gateway:8080")
+                    java_response = await http_client.get(f"{gateway_url}/api/v1/issues/{target_issue_id}")
                     db_result = java_response.json()
                 except:
                     db_result = {"status": "IN_PROGRESS", "priority": "HIGH", "notes": "Crew dispatched."}

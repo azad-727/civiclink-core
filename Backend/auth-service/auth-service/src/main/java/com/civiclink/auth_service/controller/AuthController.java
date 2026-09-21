@@ -1,6 +1,7 @@
 package com.civiclink.auth_service.controller;
 
 import com.civiclink.auth_service.dto.AuthResponse;
+import jakarta.validation.Valid;
 import com.civiclink.auth_service.dto.LoginRequest;
 import com.civiclink.auth_service.dto.RegisterRequest;
 import com.civiclink.auth_service.dto.TokenRefreshRequest;
@@ -35,7 +36,7 @@ public class AuthController {
         this.userRepository=userRepository;
     }
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request){
         try{
             authService.registerUser(request);
             return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");

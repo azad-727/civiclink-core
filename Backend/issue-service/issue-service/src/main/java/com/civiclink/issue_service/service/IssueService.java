@@ -11,7 +11,10 @@ import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +22,17 @@ import java.util.Map;
 
 @Service
 public class IssueService {
-    private final IssueRepository issueRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private static final Logger log = LoggerFactory.getLogger(IssueService.class);
 
-    public IssueService(IssueRepository issueRepository) {
+    private final IssueRepository issueRepository;
+    private final RestTemplate restTemplate;
+
+    @Value("${services.ai.url:http://civiclink-ai:8084}")
+    private String aiServiceUrl;
+
+    public IssueService(IssueRepository issueRepository, RestTemplate restTemplate) {
         this.issueRepository = issueRepository;
+        this.restTemplate = restTemplate;
     }
     public Issue createIssue(IssueRequest request, String citizenEmail) {
         Issue issue = new Issue();
@@ -80,14 +89,14 @@ public class IssueService {
             aiRequestBody.put("new_issue", newIssuePayload);
             aiRequestBody.put("recent_issues", recentIssuesList);
 
-            String aiUrl = "http://civiclink-ai:8084/api/v1/ai/detect-duplicate";
+            String aiUrl = aiServiceUrl + "/api/v1/ai/detect-duplicate";
             ResponseEntity<Map> aiResponse = restTemplate.postForEntity(aiUrl, aiRequestBody, Map.class);
 
             if (aiResponse.getStatusCode().is2xxSuccessful() && aiResponse.getBody() != null) {
                 return aiResponse.getBody();
             }
         } catch (Exception e) {
-            System.err.println("Duplicate check AI call failed: " + e.getMessage());
+            log.error("Duplicate check AI call failed: {}", e.getMessage(), e);
         }
 
         // Fallback: treat as no duplicate if AI is unreachable
@@ -106,40 +115,39 @@ public class IssueService {
     public List<Map<String, Object>> getTopContributors() {
         return issueRepository.findTopContributors();
     }
-    private void triggerAiValidation(String issueId, String imageUrl) {
-        new Thread(() -> {
-            try {
-                // Pointing to your FastAPI server[cite: 9]
-                String aiEngineUrl = "http://civiclink-ai:8084/api/v1/ai/validate-image";
+    @Async("aiTaskExecutor")
+    public void triggerAiValidation(String issueId, String imageUrl) {
+        try {
+            // Pointing to your FastAPI server[cite: 9]
+            String aiEngineUrl = aiServiceUrl + "/api/v1/ai/validate-image";
 
-                Map<String, String> requestPayload = new HashMap<>();
-                requestPayload.put("issue_id", issueId); // Matches ValidationRequest[cite: 10]
-                requestPayload.put("image_url", imageUrl); // Matches ValidationRequest[cite: 10]
+            Map<String, String> requestPayload = new HashMap<>();
+            requestPayload.put("issue_id", issueId); // Matches ValidationRequest[cite: 10]
+            requestPayload.put("image_url", imageUrl); // Matches ValidationRequest[cite: 10]
 
-                ResponseEntity<Map> response = restTemplate.postForEntity(aiEngineUrl, requestPayload, Map.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(aiEngineUrl, requestPayload, Map.class);
 
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    Map<String, Object> aiData = response.getBody();
-                    boolean isValid = (boolean) aiData.get("is_valid_civic_issue"); //[cite: 10]
-                    double confidence = (double) aiData.get("max_confidence"); //[cite: 10]
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> aiData = response.getBody();
+                boolean isValid = (boolean) aiData.get("is_valid_civic_issue"); //[cite: 10]
+                double confidence = (double) aiData.get("max_confidence"); //[cite: 10]
 
-                    Issue issueToUpdate = issueRepository.findById(issueId).orElse(null);
-                    if (issueToUpdate != null) {
-                        // Convert confidence (e.g., 0.85) to a 1-10 severity score
-                        issueToUpdate.setAiSeverityScore((int) (confidence * 10));
+                Issue issueToUpdate = issueRepository.findById(issueId).orElse(null);
+                if (issueToUpdate != null) {
+                    // Convert confidence (e.g., 0.85) to a 1-10 severity score
+                    issueToUpdate.setAiSeverityScore((int) (confidence * 10));
 
-                        if (isValid) {
-                            issueToUpdate.setStatus("OPEN");
-                        } else {
-                            issueToUpdate.setStatus("REJECTED_BY_AI");
-                        }
-                        issueRepository.save(issueToUpdate);
+                    if (isValid) {
+                        issueToUpdate.setStatus("OPEN");
+                    } else {
+                        issueToUpdate.setStatus("REJECTED_BY_AI");
                     }
+                    issueRepository.save(issueToUpdate);
                 }
-            } catch (Exception e) {
-                System.err.println("AI Engine unreachable: " + e.getMessage());
             }
-        }).start();
+        } catch (Exception e) {
+            log.error("AI Engine unreachable: {}", e.getMessage(), e);
+        }
     }
 
     public Issue updateIssuesStatus(String issueId, String newStatus){

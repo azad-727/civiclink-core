@@ -14,7 +14,7 @@ export default function Footer() {
         {/* Brand & About Section */}
         <div className="footer-brand-section">
           <Link to="/home" className="footer-logo">
-            <img src="images/logo_wbg.png" alt="CivicLink Logo" className="footer-brand-img" />
+            <img src="/images/logo_wbg.png" alt="CivicLink Logo" className="footer-brand-img" />
             <span>CivicLink</span>
           </Link>
           <p className="footer-description">
