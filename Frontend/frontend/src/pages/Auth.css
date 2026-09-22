@@ -21,7 +21,7 @@
   height: 100%;
   
   /* Link to your new image */
-  background-image: url('images/india-doddle.png'); 
+  background-image: url('/images/india-doddle.png'); 
   
   /* Tiles the image across the whole screen */
   background-repeat: repeat; 
@@ -62,7 +62,7 @@
   flex-direction: column;
   justify-content: center; /* Centers the text vertically on desktop */
   min-height: 320px; /* Gives it presence on mobile */
-  background: url('images/loginbanner.png') center/cover no-repeat;
+  background: url('/images/loginbanner.png') center/cover no-repeat;
   padding: 40px;
   color: #ffffff;
 }
