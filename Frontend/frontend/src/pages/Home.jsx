@@ -40,7 +40,7 @@ export default function Home() {
         setLoadingData(true);
 
         const [issuesRes, contributorsRes] = await Promise.all([
-          apiClient.get(`/issues/nearby?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}&radius=30.0`),
+          apiClient.get(`/issues/nearby?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}&radius=10000.0`),
           apiClient.get('/issues/contributors/top')
         ]);
 
@@ -106,7 +106,7 @@ export default function Home() {
       <section className="dashboard-section">
         <div className="section-header">
           <h2>Live Issues Dashboard</h2>
-          <p>Real-time system updates derived within a 30km operational radius.</p>
+          <p>Real-time system updates from civic issues reported nationwide.</p>
         </div>
 
         <div className="dashboard-grid">
