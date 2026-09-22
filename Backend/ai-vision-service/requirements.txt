@@ -1,21 +1,6 @@
 fastapi==0.110.0
-uvicorn[standard]==0.27.1
-python-multipart==0.0.9
-
+uvicorn==0.27.1
+pydantic==2.6.4
+google-generativeai==0.4.1
 httpx==0.27.0
 python-dotenv==1.0.1
-gradio==4.26.0
-numpy==1.26.4
-
-# torch is installed separately in the Dockerfile (CPU-only build, via its
-# own --extra-index-url) — do NOT add it here. Putting the PyTorch index
-# in this file makes pip search it for every package below too, causing
-# hash-mismatch errors on packages that exist on both indexes.
-
-opencv-python-headless==4.9.0.80   # headless build: no GUI/highgui deps, lighter than opencv-python
-ultralytics==8.1.28                # YOLOv8 for the computer-vision validation endpoint
-
-sentence-transformers==2.5.1       # duplicate-detection embeddings
-scikit-learn>=1.4.1                # cosine_similarity
-
-google-generativeai==0.4.1         # Gemini agentic chatbot (NOT openai — main.py uses genai, not the OpenAI SDK)
