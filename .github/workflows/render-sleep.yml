@@ -55,31 +55,41 @@ jobs:
           echo "▶ Action decided: $ACTION"
 
       - name: ${{ steps.action.outputs.action == 'suspend' && '🌙 Suspending all Render services' || '☀️ Resuming all Render services' }}
+        env:
+          RENDER_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_IDS: ${{ secrets.RENDER_SERVICE_IDS }}
         run: |
           ACTION="${{ steps.action.outputs.action }}"
           SUCCESS=0
           FAIL=0
 
-          for SERVICE_ID in ${{ secrets.RENDER_SERVICE_IDS }}; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+          echo "▶ Services to process: $SERVICE_IDS"
+
+          for SERVICE_ID in $SERVICE_IDS; do
+            RESPONSE=$(curl -s -w "\n%{http_code}" \
               -X POST \
               "https://api.render.com/v1/services/${SERVICE_ID}/${ACTION}" \
-              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              -H "Authorization: Bearer ${RENDER_KEY}" \
               -H "Content-Type: application/json")
 
-            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then
-              echo "  ✅ $SERVICE_ID → $ACTION (HTTP $HTTP_CODE)"
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | head -n-1)
+
+            echo "  Service: $SERVICE_ID → HTTP $HTTP_CODE"
+            echo "  Response: $BODY"
+
+            if [[ "$HTTP_CODE" =~ ^(200|201|202|204)$ ]]; then
+              echo "  ✅ $SERVICE_ID → $ACTION succeeded"
               SUCCESS=$((SUCCESS + 1))
             else
               echo "  ❌ $SERVICE_ID → FAILED (HTTP $HTTP_CODE)"
               FAIL=$((FAIL + 1))
             fi
+            echo ""
           done
 
-          echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  ✅ Success: $SUCCESS services"
-          echo "  ❌ Failed:  $FAIL services"
+          echo "  ✅ Success: $SUCCESS | ❌ Failed: $FAIL"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
           if [ "$FAIL" -gt "0" ]; then
