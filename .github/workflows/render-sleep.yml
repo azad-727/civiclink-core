@@ -97,7 +97,10 @@ jobs:
             echo "HTTP $HTTP_CODE | $BODY"
 
             if echo "$HTTP_CODE" | grep -qE '^(200|201|202|204)$'; then
-              echo "SUCCESS: $SERVICE_ID"
+              echo "SUCCESS: $SERVICE_ID $ACTION"
+              SUCCESS=$((SUCCESS + 1))
+            elif echo "$BODY" | grep -qE 'already|suspended by a user can be resumed|not suspended'; then
+              echo "ALREADY OK: $SERVICE_ID (already in desired state)"
               SUCCESS=$((SUCCESS + 1))
             else
               echo "FAILED: $SERVICE_ID (HTTP $HTTP_CODE)"
