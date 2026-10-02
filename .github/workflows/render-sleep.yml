@@ -70,7 +70,8 @@ jobs:
               -X POST \
               "https://api.render.com/v1/services/${SERVICE_ID}/${ACTION}" \
               -H "Authorization: Bearer ${RENDER_KEY}" \
-              -H "Content-Type: application/json")
+              -H "Content-Type: application/json" \
+              -d '{}')
 
             HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
             BODY=$(echo "$RESPONSE" | head -n-1)
