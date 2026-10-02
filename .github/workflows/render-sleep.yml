@@ -1,0 +1,114 @@
+name: 🌙 Render Sleep / ☀️ Wake Schedule
+
+on:
+  schedule:
+    # SUSPEND — 1:00 AM IST = 7:30 PM UTC
+    - cron: '30 19 * * *'
+    # RESUME  — 6:30 AM IST = 1:00 AM UTC
+    - cron: '0 1 * * *'
+  # Allow manual trigger from GitHub Actions UI for testing
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'resume'
+        type: choice
+        options:
+          - suspend
+          - resume
+
+jobs:
+  manage-render-services:
+    name: ${{ github.event.inputs.action == 'suspend' && '🌙 Suspending Services' || github.event.inputs.action == 'resume' && '☀️ Resuming Services' || '🔄 Auto Schedule' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determine action (scheduled vs manual)
+        id: action
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ACTION="${{ github.event.inputs.action }}"
+          else
+            HOUR=$(date -u +%H)
+            if [ "$HOUR" = "19" ]; then
+              ACTION="suspend"
+            else
+              ACTION="resume"
+            fi
+          fi
+          echo "action=$ACTION" >> $GITHUB_OUTPUT
+          echo "▶ Action decided: $ACTION"
+
+      - name: ${{ steps.action.outputs.action == 'suspend' && '🌙 Suspending all Render services' || '☀️ Resuming all Render services' }}
+        run: |
+          ACTION="${{ steps.action.outputs.action }}"
+          SUCCESS=0
+          FAIL=0
+
+          for SERVICE_ID in ${{ secrets.RENDER_SERVICE_IDS }}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST \
+              "https://api.render.com/v1/services/${SERVICE_ID}/${ACTION}" \
+              -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+              -H "Content-Type: application/json")
+
+            if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "204" ]; then
+              echo "  ✅ $SERVICE_ID → $ACTION (HTTP $HTTP_CODE)"
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "  ❌ $SERVICE_ID → FAILED (HTTP $HTTP_CODE)"
+              FAIL=$((FAIL + 1))
+            fi
+          done
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ✅ Success: $SUCCESS services"
+          echo "  ❌ Failed:  $FAIL services"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          if [ "$FAIL" -gt "0" ]; then
+            exit 1
+          fi
+
+      - name: 🔔 Pause / Resume UptimeRobot monitors
+        if: secrets.UPTIMEROBOT_API_KEY != ''
+        run: |
+          ACTION="${{ steps.action.outputs.action }}"
+          # UptimeRobot: 0 = resume, 1 = pause
+          if [ "$ACTION" = "suspend" ]; then
+            UR_STATUS=1
+            UR_LABEL="Pausing"
+          else
+            UR_STATUS=0
+            UR_LABEL="Resuming"
+          fi
+
+          echo "▶ $UR_LABEL UptimeRobot monitors..."
+
+          for MONITOR_ID in ${{ secrets.UPTIMEROBOT_MONITOR_IDS }}; do
+            RESPONSE=$(curl -s -X POST "https://api.uptimerobot.com/v2/editMonitor" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "api_key=${{ secrets.UPTIMEROBOT_API_KEY }}&id=$MONITOR_ID&status=$UR_STATUS")
+
+            STATUS=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('stat','fail'))" 2>/dev/null || echo "fail")
+
+            if [ "$STATUS" = "ok" ]; then
+              echo "  ✅ Monitor $MONITOR_ID → $UR_LABEL"
+            else
+              echo "  ⚠️  Monitor $MONITOR_ID → failed (non-critical): $RESPONSE"
+            fi
+          done
+
+      - name: 📊 Summary
+        run: |
+          ACTION="${{ steps.action.outputs.action }}"
+          IST_TIME=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M IST')
+          if [ "$ACTION" = "suspend" ]; then
+            echo "🌙 All services suspended at $IST_TIME"
+            echo "   Next wake-up: 6:30 AM IST"
+          else
+            echo "☀️  All services resumed at $IST_TIME"
+            echo "   Next sleep: 1:00 AM IST"
+          fi
