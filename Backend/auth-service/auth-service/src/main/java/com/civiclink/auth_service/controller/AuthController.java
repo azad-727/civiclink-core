@@ -2,8 +2,10 @@ package com.civiclink.auth_service.controller;
 
 import com.civiclink.auth_service.dto.AuthResponse;
 import jakarta.validation.Valid;
+import com.civiclink.auth_service.dto.ForgotPasswordRequest;
 import com.civiclink.auth_service.dto.LoginRequest;
 import com.civiclink.auth_service.dto.RegisterRequest;
+import com.civiclink.auth_service.dto.ResetPasswordRequest;
 import com.civiclink.auth_service.dto.TokenRefreshRequest;
 import com.civiclink.auth_service.model.RefreshToken;
 import com.civiclink.auth_service.model.User;
@@ -94,4 +96,27 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Session Error: " + e.getMessage());
         }
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        try {
+            authService.initiatePasswordReset(request.email());
+            return ResponseEntity.ok("OTP sent to your email address.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP. Please try again.");
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request.email(), request.otp(), request.newPassword());
+            return ResponseEntity.ok("Password reset successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
+
