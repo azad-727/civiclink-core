@@ -17,6 +17,10 @@ on:
         options:
           - suspend
           - resume
+  # Ignore push events entirely — only run on schedule or manual trigger
+  push:
+    branches-ignore:
+      - '**'
 
 jobs:
   manage-render-services:
