@@ -1,12 +1,9 @@
-name: 🌙 Render Sleep / ☀️ Wake Schedule
+name: Render Sleep Wake Schedule
 
 on:
   schedule:
-    # SUSPEND — 1:00 AM IST = 7:30 PM UTC
-    - cron: '30 19 * * *'
-    # RESUME  — 6:30 AM IST = 1:00 AM UTC
-    - cron: '0 1 * * *'
-  # Allow manual trigger from GitHub Actions UI for testing
+    - cron: '30 19 * * *'   # SUSPEND — 1:00 AM IST = 7:30 PM UTC
+    - cron: '0 1 * * *'     # RESUME  — 6:30 AM IST = 1:00 AM UTC
   workflow_dispatch:
     inputs:
       action:
@@ -20,25 +17,25 @@ on:
 
 jobs:
   manage-render-services:
-    name: ${{ github.event.inputs.action == 'suspend' && '🌙 Suspending Services' || github.event.inputs.action == 'resume' && '☀️ Resuming Services' || '🔄 Auto Schedule' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: ✅ Validate secrets are configured
+      - name: Validate secrets
         run: |
-          if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
-            echo "❌ RENDER_API_KEY secret is not set."
-            echo "   Go to: GitHub repo → Settings → Secrets → Actions → New secret"
+          if [ -z "$RENDER_API_KEY" ]; then
+            echo "RENDER_API_KEY secret is not set"
             exit 1
           fi
-          if [ -z "${{ secrets.RENDER_SERVICE_IDS }}" ]; then
-            echo "❌ RENDER_SERVICE_IDS secret is not set."
-            echo "   Add space-separated Render service IDs (srv-xxxxx)"
+          if [ -z "$RENDER_SERVICE_IDS" ]; then
+            echo "RENDER_SERVICE_IDS secret is not set"
             exit 1
           fi
-          echo "✅ All required secrets are present."
+          echo "All secrets present"
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_IDS: ${{ secrets.RENDER_SERVICE_IDS }}
 
-      - name: Determine action (scheduled vs manual)
+      - name: Determine action
         id: action
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -52,124 +49,109 @@ jobs:
             fi
           fi
           echo "action=$ACTION" >> $GITHUB_OUTPUT
-          echo "▶ Action decided: $ACTION"
+          echo "Action: $ACTION"
 
-      - name: 🔍 Verify Render API key
+      - name: Verify Render API key
         env:
           RENDER_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          echo "▶ Testing Render API key..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
+          HTTP_CODE=$(curl -s -o /tmp/render_services.json -w "%{http_code}" \
             -H "Authorization: Bearer ${RENDER_KEY}" \
-            "https://api.render.com/v1/services?limit=5")
+            -H "Accept: application/json" \
+            "https://api.render.com/v1/services?limit=10")
 
-          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-          BODY=$(echo "$RESPONSE" | head -n-1)
+          echo "API key check: HTTP $HTTP_CODE"
 
-          echo "  HTTP $HTTP_CODE"
-
-          if [[ "$HTTP_CODE" =~ ^(200|201)$ ]]; then
-            echo "✅ API key is valid!"
-            echo "  Services found:"
-            echo "$BODY" | python3 -c "
-import sys, json
-data = json.load(sys.stdin)
-for item in data[:5]:
-    svc = item.get('service', item)
-    print(f'  - {svc.get(\"id\",\"?\")} | {svc.get(\"name\",\"?\")} | {svc.get(\"type\",\"?\")}')
-" 2>/dev/null || echo "  (raw: $BODY)"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "API key is valid. Your services:"
+            jq -r '.[] | "  - \(.service.id) | \(.service.name) | \(.service.type)"' /tmp/render_services.json 2>/dev/null || cat /tmp/render_services.json
           else
-            echo "❌ API key check failed (HTTP $HTTP_CODE)"
-            echo "  Response: $BODY"
+            echo "API key check failed:"
+            cat /tmp/render_services.json
             exit 1
           fi
 
-      - name: ${{ steps.action.outputs.action == 'suspend' && '🌙 Suspending all Render services' || '☀️ Resuming all Render services' }}
+      - name: Suspend or Resume Render services
         env:
           RENDER_KEY: ${{ secrets.RENDER_API_KEY }}
           SERVICE_IDS: ${{ secrets.RENDER_SERVICE_IDS }}
+          ACTION: ${{ steps.action.outputs.action }}
         run: |
-          ACTION="${{ steps.action.outputs.action }}"
           SUCCESS=0
           FAIL=0
 
-          echo "▶ Action: $ACTION"
-          echo "▶ Service IDs: $SERVICE_IDS"
+          echo "Action: $ACTION"
+          echo "Service IDs: $SERVICE_IDS"
+          echo ""
 
           for SERVICE_ID in $SERVICE_IDS; do
-            echo "  → Calling: POST /v1/services/${SERVICE_ID}/${ACTION}"
+            echo "Calling: POST /v1/services/${SERVICE_ID}/${ACTION}"
 
-            RESPONSE=$(curl -s -w "\n%{http_code}" \
+            HTTP_CODE=$(curl -s -o /tmp/render_resp.json -w "%{http_code}" \
               -X POST \
               "https://api.render.com/v1/services/${SERVICE_ID}/${ACTION}" \
-              -H "Authorization: Bearer ${RENDER_KEY}")
+              -H "Authorization: Bearer ${RENDER_KEY}" \
+              -H "Accept: application/json")
 
-            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
-            BODY=$(echo "$RESPONSE" | head -n-1)
+            BODY=$(cat /tmp/render_resp.json)
+            echo "HTTP $HTTP_CODE | $BODY"
 
-            echo "    HTTP $HTTP_CODE | Response: $BODY"
-
-            if [[ "$HTTP_CODE" =~ ^(200|201|202|204)$ ]]; then
-              echo "  ✅ $SERVICE_ID → $ACTION succeeded"
+            if echo "$HTTP_CODE" | grep -qE '^(200|201|202|204)$'; then
+              echo "SUCCESS: $SERVICE_ID"
               SUCCESS=$((SUCCESS + 1))
             else
-              echo "  ❌ $SERVICE_ID → FAILED (HTTP $HTTP_CODE)"
+              echo "FAILED: $SERVICE_ID (HTTP $HTTP_CODE)"
               FAIL=$((FAIL + 1))
             fi
+            echo ""
           done
 
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "  ✅ Success: $SUCCESS | ❌ Failed: $FAIL"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Success: $SUCCESS | Failed: $FAIL"
 
           if [ "$FAIL" -gt "0" ]; then
             exit 1
           fi
 
-      - name: 🔔 Pause / Resume UptimeRobot monitors
+      - name: Pause or Resume UptimeRobot monitors
         env:
           UR_API_KEY: ${{ secrets.UPTIMEROBOT_API_KEY }}
           UR_MONITOR_IDS: ${{ secrets.UPTIMEROBOT_MONITOR_IDS }}
+          ACTION: ${{ steps.action.outputs.action }}
         run: |
-          ACTION="${{ steps.action.outputs.action }}"
-          # UptimeRobot: 0 = resume, 1 = pause
+          if [ -z "$UR_API_KEY" ]; then
+            echo "UPTIMEROBOT_API_KEY not set, skipping"
+            exit 0
+          fi
+
           if [ "$ACTION" = "suspend" ]; then
             UR_STATUS=1
-            UR_LABEL="Pausing"
+            LABEL="Pausing"
           else
             UR_STATUS=0
-            UR_LABEL="Resuming"
+            LABEL="Resuming"
           fi
 
-          echo "▶ $UR_LABEL UptimeRobot monitors..."
+          echo "$LABEL UptimeRobot monitors..."
 
-          if [ -z "$UR_API_KEY" ]; then
-            echo "  ⚠️  UPTIMEROBOT_API_KEY not set, skipping."
-          else
-            for MONITOR_ID in $UR_MONITOR_IDS; do
-              RESPONSE=$(curl -s -X POST "https://api.uptimerobot.com/v2/editMonitor" \
-                -H "Content-Type: application/x-www-form-urlencoded" \
-                -d "api_key=${UR_API_KEY}&id=${MONITOR_ID}&status=${UR_STATUS}")
+          for MONITOR_ID in $UR_MONITOR_IDS; do
+            RESPONSE=$(curl -s -X POST "https://api.uptimerobot.com/v2/editMonitor" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "api_key=${UR_API_KEY}&id=${MONITOR_ID}&status=${UR_STATUS}")
 
-              STATUS=$(echo $RESPONSE | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('stat','fail'))" 2>/dev/null || echo "fail")
+            if echo "$RESPONSE" | grep -q '"stat":"ok"'; then
+              echo "Monitor $MONITOR_ID: OK"
+            else
+              echo "Monitor $MONITOR_ID: non-critical warn: $RESPONSE"
+            fi
+          done
 
-              if [ "$STATUS" = "ok" ]; then
-                echo "  ✅ Monitor $MONITOR_ID → $UR_LABEL"
-              else
-                echo "  ⚠️  Monitor $MONITOR_ID → non-critical fail: $RESPONSE"
-              fi
-            done
-          fi
-
-      - name: 📊 Summary
+      - name: Summary
+        env:
+          ACTION: ${{ steps.action.outputs.action }}
         run: |
-          ACTION="${{ steps.action.outputs.action }}"
           IST_TIME=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M IST')
           if [ "$ACTION" = "suspend" ]; then
-            echo "🌙 All services suspended at $IST_TIME"
-            echo "   Next wake-up: 6:30 AM IST"
+            echo "All services suspended at $IST_TIME. Next wake: 6:30 AM IST"
           else
-            echo "☀️  All services resumed at $IST_TIME"
-            echo "   Next sleep: 1:00 AM IST"
+            echo "All services resumed at $IST_TIME. Next sleep: 1:00 AM IST"
           fi
