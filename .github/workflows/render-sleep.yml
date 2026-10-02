@@ -24,6 +24,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: ✅ Validate secrets are configured
+        run: |
+          if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
+            echo "❌ RENDER_API_KEY secret is not set."
+            echo "   Go to: GitHub repo → Settings → Secrets → Actions → New secret"
+            exit 1
+          fi
+          if [ -z "${{ secrets.RENDER_SERVICE_IDS }}" ]; then
+            echo "❌ RENDER_SERVICE_IDS secret is not set."
+            echo "   Add space-separated Render service IDs (srv-xxxxx)"
+            exit 1
+          fi
+          echo "✅ All required secrets are present."
+
       - name: Determine action (scheduled vs manual)
         id: action
         run: |
