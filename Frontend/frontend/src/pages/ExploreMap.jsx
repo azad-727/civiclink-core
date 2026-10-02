@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import apiClient from '../apiClient';
+import GuestGuard from '../components/GuestGuard';
 import './ExploreMap.css';
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -329,13 +330,15 @@ export default function ExploreMap() {
               <div className="card-footer">
                 <span className="status-open">🔴 {issue.status || 'OPEN'}</span>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button 
-                    className="btn-route-small" 
-                    style={{ backgroundColor: '#10b981' }}
-                    onClick={(e) => handleVerifyIssue(e, issue.id)}
-                  >
-                    Verify
-                  </button>
+                  <GuestGuard action="Verifying issues">
+                    <button 
+                      className="btn-route-small" 
+                      style={{ backgroundColor: '#10b981' }}
+                      onClick={(e) => handleVerifyIssue(e, issue.id)}
+                    >
+                      Verify
+                    </button>
+                  </GuestGuard>
                 </div>
               </div>
             </div>

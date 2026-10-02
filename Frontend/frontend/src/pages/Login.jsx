@@ -7,7 +7,7 @@ import './Auth.css';
 export default function Login() {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginAsGuest } = useAuth();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -84,9 +84,28 @@ export default function Login() {
               onChange={handleChange} 
               required 
             />
+
+            <div style={{ textAlign: 'right', marginBottom: '16px', marginTop: '-8px' }}>
+              <a href="/forgot-password" style={{ color: '#4f46e5', fontSize: '0.875rem', textDecoration: 'none' }}>
+                Forgot Password?
+              </a>
+            </div>
             
             <button type="submit" className="btn-submit">
               Sign In
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { loginAsGuest(); navigate('/home'); }}
+              style={{
+                width: '100%', padding: '12px', background: 'transparent',
+                border: '2px dashed #cbd5e1', borderRadius: '8px',
+                color: '#64748b', cursor: 'pointer', fontWeight: '500',
+                marginTop: '8px', fontSize: '0.95rem', transition: 'all 0.2s'
+              }}
+            >
+              👤 Continue as Guest
             </button>
           </form>
 

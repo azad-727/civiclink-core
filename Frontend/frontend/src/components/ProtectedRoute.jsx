@@ -3,14 +3,14 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isGuest, loading } = useAuth();
 
-  // Show a blank screen or spinner while checking local storage on first load
-  if (loading) {
-    return null; 
+  if (loading) return null;
+
+  // Guests and unauthenticated users both get redirected to login
+  if (!isAuthenticated || isGuest) {
+    return <Navigate to="/login" replace />;
   }
 
-  // If authenticated, render the child component (<Outlet />). 
-  // If not, redirect to the login page immediately.
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  return <Outlet />;
 }

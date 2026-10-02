@@ -8,7 +8,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isGuest, user } = useAuth();
   const navigate = useNavigate();
   const isAmcOrAdmin = ['ADMIN', 'AMC_OFFICER'].includes(user?.role?.toUpperCase());
 
@@ -73,7 +73,14 @@ export default function Navbar() {
             />
           </form>
 
-          {isAuthenticated ? (
+          {isGuest ? (
+            <>
+              <span style={{ background: '#f1f5f9', color: '#64748b', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>Guest</span>
+              <Link to="/login" className="icon-btn" aria-label="Sign In">
+                <User size={22} />
+              </Link>
+            </>
+          ) : isAuthenticated ? (
             <Link to="/profile" className="icon-btn profile-filled" aria-label="Profile">
               <User size={20} color="white" strokeWidth={2.5} />
             </Link>
@@ -118,7 +125,9 @@ export default function Navbar() {
           )}
         </ul>
         <div className="mobile-actions">
-          {isAuthenticated ? (
+          {isGuest ? (
+            <Link to="/login" className="mobile-action-btn" onClick={closeMobileMenu}><User size={20} /> Sign In</Link>
+          ) : isAuthenticated ? (
             <Link to="/profile" className="mobile-action-btn" onClick={closeMobileMenu}><User size={20} /> My Profile</Link>
           ) : (
             <Link to="/login" className="mobile-action-btn" onClick={closeMobileMenu}><User size={20} /> Sign In</Link>

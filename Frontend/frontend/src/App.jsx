@@ -23,6 +23,7 @@ const Profile = React.lazy(() => import('./pages/Profile'));
 const Home = React.lazy(() => import('./pages/Home'));
 const ExploreMap = React.lazy(() => import('./pages/ExploreMap'));
 const IssueDetail = React.lazy(() => import('./pages/IssueDetail'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 
 const Placeholder = ({ title }) => <div className="p-12 text-center text-2xl font-bold">{title}</div>;
 
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="login" element={<Login />} />
               <Route path="register" element={<SignUp />} />
               <Route path="about" element={<About />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
               
               {/* SECURE ROUTES: Requires Authentication */}
               <Route element={<ProtectedRoute />}>
