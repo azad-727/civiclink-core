@@ -54,6 +54,36 @@ jobs:
           echo "action=$ACTION" >> $GITHUB_OUTPUT
           echo "▶ Action decided: $ACTION"
 
+      - name: 🔍 Verify Render API key
+        env:
+          RENDER_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          echo "▶ Testing Render API key..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${RENDER_KEY}" \
+            "https://api.render.com/v1/services?limit=5")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+
+          echo "  HTTP $HTTP_CODE"
+
+          if [[ "$HTTP_CODE" =~ ^(200|201)$ ]]; then
+            echo "✅ API key is valid!"
+            echo "  Services found:"
+            echo "$BODY" | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+for item in data[:5]:
+    svc = item.get('service', item)
+    print(f'  - {svc.get(\"id\",\"?\")} | {svc.get(\"name\",\"?\")} | {svc.get(\"type\",\"?\")}')
+" 2>/dev/null || echo "  (raw: $BODY)"
+          else
+            echo "❌ API key check failed (HTTP $HTTP_CODE)"
+            echo "  Response: $BODY"
+            exit 1
+          fi
+
       - name: ${{ steps.action.outputs.action == 'suspend' && '🌙 Suspending all Render services' || '☀️ Resuming all Render services' }}
         env:
           RENDER_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -63,21 +93,21 @@ jobs:
           SUCCESS=0
           FAIL=0
 
-          echo "▶ Services to process: $SERVICE_IDS"
+          echo "▶ Action: $ACTION"
+          echo "▶ Service IDs: $SERVICE_IDS"
 
           for SERVICE_ID in $SERVICE_IDS; do
+            echo "  → Calling: POST /v1/services/${SERVICE_ID}/${ACTION}"
+
             RESPONSE=$(curl -s -w "\n%{http_code}" \
               -X POST \
               "https://api.render.com/v1/services/${SERVICE_ID}/${ACTION}" \
-              -H "Authorization: Bearer ${RENDER_KEY}" \
-              -H "Content-Type: application/json" \
-              -d '{}')
+              -H "Authorization: Bearer ${RENDER_KEY}")
 
             HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
             BODY=$(echo "$RESPONSE" | head -n-1)
 
-            echo "  Service: $SERVICE_ID → HTTP $HTTP_CODE"
-            echo "  Response: $BODY"
+            echo "    HTTP $HTTP_CODE | Response: $BODY"
 
             if [[ "$HTTP_CODE" =~ ^(200|201|202|204)$ ]]; then
               echo "  ✅ $SERVICE_ID → $ACTION succeeded"
@@ -86,9 +116,9 @@ jobs:
               echo "  ❌ $SERVICE_ID → FAILED (HTTP $HTTP_CODE)"
               FAIL=$((FAIL + 1))
             fi
-            echo ""
           done
 
+          echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "  ✅ Success: $SUCCESS | ❌ Failed: $FAIL"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
