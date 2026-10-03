@@ -41,7 +41,14 @@ async function fetchClient(endpoint, { method = 'GET', body, ...customConfig } =
   }
 
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, config);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...config,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
 
     // ✅ Key fix: intercept 401 before anything else
     if (response.status === 401) {
@@ -68,6 +75,9 @@ async function fetchClient(endpoint, { method = 'GET', body, ...customConfig } =
 
     return data;
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. The server may be waking up — please try again in a moment.');
+    }
     console.error('API Client Error:', error);
     throw error;
   }

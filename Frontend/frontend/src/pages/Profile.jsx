@@ -15,7 +15,10 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchUserContributions = async () => {
-      if (!user?.email) return;
+      if (!user?.email) {
+        setLoading(false); // don't hang forever if no user
+        return;
+      }
 
       try {
         setLoading(true);
