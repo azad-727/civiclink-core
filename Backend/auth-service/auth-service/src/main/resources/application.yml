@@ -19,6 +19,9 @@ spring:
             auth: true
             starttls:
               enable: true
+            connectiontimeout: 5000   # 5s to establish connection
+            timeout: 5000             # 5s read timeout
+            writetimeout: 5000        # 5s write timeout
 
 
 jwt:

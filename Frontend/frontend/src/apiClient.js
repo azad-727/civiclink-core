@@ -42,7 +42,7 @@ async function fetchClient(endpoint, { method = 'GET', body, ...customConfig } =
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s — handles Render cold starts
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       ...config,
