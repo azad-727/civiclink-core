@@ -115,38 +115,13 @@ jobs:
             exit 1
           fi
 
-      - name: Pause or Resume UptimeRobot monitors
+      - name: UptimeRobot note
         env:
-          UR_API_KEY: ${{ secrets.UPTIMEROBOT_API_KEY }}
-          UR_MONITOR_IDS: ${{ secrets.UPTIMEROBOT_MONITOR_IDS }}
-          ACTION: ${{ steps.action.outputs.action }}
+          ACTION: ${{ steps.action.outputs.action }}\
         run: |
-          if [ -z "$UR_API_KEY" ]; then
-            echo "UPTIMEROBOT_API_KEY not set, skipping"
-            exit 0
-          fi
-
-          if [ "$ACTION" = "suspend" ]; then
-            UR_STATUS=1
-            LABEL="Pausing"
-          else
-            UR_STATUS=0
-            LABEL="Resuming"
-          fi
-
-          echo "$LABEL UptimeRobot monitors..."
-
-          for MONITOR_ID in $UR_MONITOR_IDS; do
-            RESPONSE=$(curl -s -X POST "https://api.uptimerobot.com/v2/editMonitor" \
-              -H "Content-Type: application/x-www-form-urlencoded" \
-              -d "api_key=${UR_API_KEY}&id=${MONITOR_ID}&status=${UR_STATUS}")
-
-            if echo "$RESPONSE" | grep -q '"stat":"ok"'; then
-              echo "Monitor $MONITOR_ID: OK"
-            else
-              echo "Monitor $MONITOR_ID: non-critical warn: $RESPONSE"
-            fi
-          done
+          echo "ℹ️  UptimeRobot monitors run 24/7 (not paused during sleep)."
+          echo "   During suspend hours monitors will show DOWN — this is expected."
+          echo "   Once services resume at 6:30 AM IST they will go green automatically."
 
       - name: Summary
         env:
