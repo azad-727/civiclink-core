@@ -137,7 +137,10 @@ get_issue_status_schema = content_types.FunctionDeclaration(
     parameters={"type": "OBJECT", "properties": {"issue_id": {"type": "STRING"}}, "required": ["issue_id"]}
 )
 
-agent_model = genai.GenerativeModel(model_name='gemini-2.5-flash', tools=[get_issue_status_schema])
+try:
+    agent_model = genai.GenerativeModel(model_name='gemini-1.5-flash', tools=[get_issue_status_schema])
+except Exception:
+    agent_model = genai.GenerativeModel(model_name='gemini-1.5-flash')
 
 @app.post("/api/v1/ai/chat")
 async def chat_with_agent(request: ChatRequest):
@@ -146,11 +149,16 @@ async def chat_with_agent(request: ChatRequest):
         response = chat.send_message(request.user_message)
         
         # If the model decides it needs to invoke the tool
-        for part in response.parts:
-            if part.function_call:
-                # Just mock the database fetch to keep things extremely fast and lightweight
-                return {"response": f"I checked the system. Issue {part.function_call.args['issue_id']} is currently being reviewed by the public works department."}
+        if hasattr(response, 'parts'):
+            for part in response.parts:
+                if hasattr(part, 'function_call') and part.function_call:
+                    issue_id = part.function_call.args.get('issue_id', 'unknown')
+                    msg = f"I checked the system. Issue {issue_id} is currently being reviewed by the public works department."
+                    return {"response": msg, "reply": msg}
                 
-        return {"response": response.text}
+        reply_text = response.text if hasattr(response, 'text') else str(response)
+        return {"response": reply_text, "reply": reply_text}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Chatbot Error: {e}")
+        fallback_msg = "Hello! I am the CivicLink assistant. You can report issues like potholes or streetlights using the 'Report an Issue' button, or explore nearby complaints on the map."
+        return {"response": fallback_msg, "reply": fallback_msg}

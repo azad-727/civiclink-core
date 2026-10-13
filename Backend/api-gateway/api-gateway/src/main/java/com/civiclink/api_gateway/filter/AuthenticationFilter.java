@@ -22,7 +22,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             "/api/v1/auth/forgot-password",
             "/api/v1/auth/reset-password",
             "/api/v1/issues/nearby",
-            "/api/v1/issues/contributors/top"
+            "/api/v1/issues/contributors/top",
+            "/api/v1/ai/chat"
     );
 
     public AuthenticationFilter(JwtUtil jwtUtil) {

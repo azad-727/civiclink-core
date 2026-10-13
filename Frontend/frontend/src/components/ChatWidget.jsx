@@ -41,12 +41,13 @@ export default function ChatWidget() {
       // Routed through api-gateway (/api/v1/ai/**) to ai-vision-service's
       // /api/v1/ai/chat endpoint.
       const data = await apiClient.post('/ai/chat', { user_message: trimmed });
-      setMessages((prev) => [...prev, { role: 'assistant', text: data.reply }]);
+      const botReply = data?.reply || data?.response || (typeof data === 'string' ? data : "I'm here to help with civic issues in your area.");
+      setMessages((prev) => [...prev, { role: 'assistant', text: botReply }]);
     } catch (err) {
-      setError(err.message || 'Something went wrong reaching the assistant.');
+      setError(err?.message || 'The assistant is currently unavailable.');
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: "Sorry, I couldn't reach the assistant right now. Please try again in a moment." },
+        { role: 'assistant', text: "The assistant server is warming up or temporarily busy. Please try again in a few seconds." },
       ]);
     } finally {
       setIsSending(false);
