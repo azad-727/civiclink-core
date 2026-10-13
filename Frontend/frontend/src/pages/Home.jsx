@@ -39,10 +39,13 @@ export default function Home() {
       try {
         setLoadingData(true);
 
-        const [issuesRes, contributorsRes] = await Promise.all([
+        const results = await Promise.allSettled([
           apiClient.get(`/issues/nearby?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}&radius=10000.0`),
           apiClient.get('/issues/contributors/top')
         ]);
+
+        const issuesRes = results[0].status === 'fulfilled' ? results[0].value : [];
+        const contributorsRes = results[1].status === 'fulfilled' ? results[1].value : [];
 
         // BULLETPROOF EXTRACTION: Guarantee we always have an array
         const rawIssues = issuesRes?.data || issuesRes;
