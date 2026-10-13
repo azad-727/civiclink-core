@@ -30,11 +30,16 @@ public class GatewayConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(Arrays.asList(allowedOriginsRaw.split(",")));
+        // Default includes localhost + Vercel production URL
+        // Override by setting CORS_ALLOWED_ORIGINS env var on Render (comma-separated)
+        String defaultOrigins = "http://localhost:3000,http://localhost:5173,https://civiclink-core-eosin.vercel.app";
+        String rawOrigins = allowedOriginsRaw.contains("localhost") ? defaultOrigins : allowedOriginsRaw;
+        corsConfig.setAllowedOrigins(Arrays.asList(rawOrigins.split(",")));
         corsConfig.setMaxAge(3600L);
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(Collections.singletonList("*"));
-        corsConfig.setAllowCredentials(true); // Needed if you ever send cookies/auth headers
+        corsConfig.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        corsConfig.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfig);
         return new CorsWebFilter(source);
