@@ -22,7 +22,12 @@ export default function ForgotPassword() {
       await apiClient.post('/auth/forgot-password', { email });
       setStep(2);
     } catch (err) {
-      setError(err?.message || 'No account found with this email. Please check and try again.');
+      const msg = err?.message || '';
+      if (msg.includes('org.') || msg.includes('java.') || msg.includes('Exception') || msg.includes('Mail') || msg.includes('timeout') || msg.includes('500')) {
+        setError('Unable to send OTP to your email right now. Please try again shortly.');
+      } else {
+        setError(msg || 'No account found with this email. Please check and try again.');
+      }
     } finally {
       setLoading(false);
     }

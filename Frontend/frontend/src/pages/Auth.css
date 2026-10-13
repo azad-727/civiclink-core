@@ -328,12 +328,14 @@
 /* Alert Box Styles */
 .alert-box {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 12px 16px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
   margin-bottom: 20px;
+  word-break: break-word;
 }
 .alert-error {
   background-color: #FEF2F2;

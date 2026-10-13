@@ -9,11 +9,17 @@ import com.civiclink.auth_service.repository.PasswordResetTokenRepository;
 import com.civiclink.auth_service.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Random;
 
@@ -26,6 +32,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JavaMailSender mailSender;
+
+    @Value("${resend.api.key:${RESEND_API_KEY:}}")
+    private String resendApiKey;
 
     AuthService(UserRepository userRepo, PasswordEncoder encoder,
                 PasswordResetTokenRepository passwordResetTokenRepository,
@@ -78,14 +87,71 @@ public class AuthService {
         // Save to MongoDB
         passwordResetTokenRepository.save(new PasswordResetToken(email, otp, expiresAt));
 
-        // Send email
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("CivicLink — Password Reset OTP");
-        message.setText("Your CivicLink password reset OTP is: " + otp
-                + "\n\nThis code expires in 15 minutes."
-                + "\n\nIf you did not request this, please ignore this email.");
-        mailSender.send(message);
+        // Deliver email via Resend (HTTPS 443) or SMTP fallback
+        sendOtpEmail(email, otp);
+    }
+
+    private void sendOtpEmail(String email, String otp) {
+        log.info("==================================================");
+        log.info("🔑 [CIVICLINK OTP] Generated OTP for {}: {}", email, otp);
+        log.info("==================================================");
+
+        // 1. Prefer Resend HTTP API (Port 443 HTTPS - never blocked by Render Free Tier)
+        if (resendApiKey != null && !resendApiKey.isBlank()) {
+            try {
+                sendViaResend(resendApiKey.trim(), email, otp);
+                return;
+            } catch (Exception e) {
+                log.error("Failed to send email via Resend API: {}", e.getMessage());
+            }
+        }
+
+        // 2. Fallback to JavaMailSender SMTP (works locally or on unblocked hosts)
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("CivicLink — Password Reset OTP");
+            message.setText("Your CivicLink password reset OTP is: " + otp
+                    + "\n\nThis code expires in 15 minutes."
+                    + "\n\nIf you did not request this, please ignore this email.");
+            mailSender.send(message);
+            log.info("✅ SMTP email sent successfully to {}", email);
+        } catch (Exception e) {
+            log.warn("⚠️ SMTP failed (Render free tier blocks SMTP ports 25/465/587). Error: {}", e.getMessage());
+            throw new RuntimeException("Email delivery failed. Please configure RESEND_API_KEY in Render environment settings.");
+        }
+    }
+
+    private void sendViaResend(String apiKey, String toEmail, String otp) throws Exception {
+        String jsonPayload = String.format("""
+            {
+              "from": "CivicLink <onboarding@resend.dev>",
+              "to": ["%s"],
+              "subject": "CivicLink — Password Reset OTP",
+              "html": "<div style=\\"font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px;\\"><h2 style=\\"color: #1e293b;\\">CivicLink Password Reset</h2><p style=\\"color: #475569;\\">You requested a password reset. Use the following 6-digit OTP code:</p><div style=\\"font-size: 2rem; font-weight: bold; letter-spacing: 0.3em; text-align: center; color: #3b82f6; margin: 24px 0; padding: 12px; background: #f8fafc; border-radius: 6px;\\">%s</div><p style=\\"color: #64748b; font-size: 0.875rem;\\">This code expires in 15 minutes. If you did not request this, please ignore this email.</p></div>"
+            }
+            """, toEmail, otp);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.resend.com/emails"))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .timeout(Duration.ofSeconds(10))
+                .build();
+
+        HttpClient client = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(5))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            log.info("✅ Resend email delivered successfully to {}", toEmail);
+        } else {
+            log.error("❌ Resend API error (HTTP {}): {}", response.statusCode(), response.body());
+            throw new RuntimeException("Resend API failed: " + response.body());
+        }
     }
 
     public void resetPassword(String email, String otp, String newPassword) {

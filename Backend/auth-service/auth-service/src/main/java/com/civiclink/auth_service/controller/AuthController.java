@@ -105,12 +105,13 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            // Log the real error so it shows in Render logs
-            System.err.println("❌ OTP send failed for [" + request.email() + "]: " + e.getClass().getSimpleName() + " — " + e.getMessage());
-            if (e.getCause() != null) {
-                System.err.println("   Caused by: " + e.getCause().getMessage());
-            }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP: " + e.getMessage());
+            // Log full error in Render logs (never shown to user)
+            System.err.println("❌ OTP send failed for [" + request.email() + "]: "
+                    + e.getClass().getSimpleName() + " — " + e.getMessage());
+            if (e.getCause() != null) System.err.println("   Caused by: " + e.getCause().getMessage());
+            // Return friendly message to user
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to send OTP. Please try again in a moment.");
         }
     }
 
